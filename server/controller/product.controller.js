@@ -79,4 +79,51 @@ module.exports = {
       res.status(500).json({ error: error.message });
     }
   },
+
+  getBySubcategory: async (req, res) => {
+    try {
+      const subcategoryId = req.params.subcategoryId;
+      const products = await Product.findAll({
+        where: { SubCategoryId: subcategoryId },
+        include: [{
+          model: models.SubCategory,
+          include: [{
+            model: models.Category
+          }]
+        }]
+      });
+      
+      res.json(products);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  },
+  
+  getByCategoryId: async (req, res) => {
+    try {
+      const categoryId = req.params.categoryId;
+      
+      // Find all subcategories of this category
+      const subcategories = await models.SubCategory.findAll({
+        where: { CategoryId: categoryId }
+      });
+      
+      const subcategoryIds = subcategories.map(subcat => subcat.id);
+      
+      // Find all products in these subcategories
+      const products = await Product.findAll({
+        where: { SubCategoryId: subcategoryIds },
+        include: [{
+          model: models.SubCategory,
+          include: [{
+            model: models.Category
+          }]
+        }]
+      });
+      
+      res.json(products);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  },
 };

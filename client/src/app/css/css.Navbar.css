@@ -1,0 +1,187 @@
+/* Navbar.css - Professional styling for LABESNI navigation */
+
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background-color: #ffffff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 0.5rem 0;
+  transition: all 0.3s ease;
+}
+
+.navbar.scrolled {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 0.25rem 0;
+}
+
+.navbar-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 4rem;
+}
+
+.navbar-logo {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.navbar-logo-text {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #14b8a6;
+  letter-spacing: 0.05em;
+  transition: transform 0.3s ease;
+}
+
+.navbar-logo:hover .navbar-logo-text {
+  transform: scale(1.05);
+}
+
+.navbar-links {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+.navbar-link {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #4b5563;
+  text-decoration: none;
+  position: relative;
+  transition: color 0.3s ease;
+}
+
+.navbar-link:hover {
+  color: #14b8a6;
+}
+
+.navbar-link::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: #14b8a6;
+  transition: width 0.3s ease;
+}
+
+.navbar-link:hover::after {
+  width: 100%;
+}
+
+.navbar-cart {
+  position: relative;
+}
+
+.navbar-cart-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: #4b5563;
+  transition: color 0.3s ease, transform 0.2s ease;
+}
+
+.navbar-cart:hover .navbar-cart-icon {
+  color: #14b8a6;
+  transform: scale(1.1);
+}
+
+.navbar-cart-count {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background-color: #ef4444;
+  color: white;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+}
+
+.navbar-toggle {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+}
+
+.navbar-toggle:focus {
+  outline: none;
+}
+
+.navbar-toggle-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: #4b5563;
+  transition: color 0.3s ease;
+}
+
+.navbar-toggle:hover .navbar-toggle-icon {
+  color: #14b8a6;
+}
+
+.navbar-mobile {
+  display: none;
+  background-color: white;
+  padding: 1rem 0;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-mobile-link {
+  display: block;
+  padding: 0.75rem 1rem;
+  color: #4b5563;
+  font-weight: 500;
+  text-decoration: none;
+  border-radius: 0.25rem;
+  transition: all 0.2s ease;
+}
+
+.navbar-mobile-link:hover {
+  background-color: #f3f4f6;
+  color: #14b8a6;
+}
+
+/* Media Queries */
+@media (max-width: 768px) {
+  .navbar-links {
+    display: none;
+  }
+  
+  .navbar-toggle {
+    display: inline-flex;
+  }
+  
+  .navbar-mobile.active {
+    display: block;
+  }
+}
+
+/* Animation for mobile menu */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.navbar-mobile.active {
+  animation: slideDown 0.3s ease forwards;
+}

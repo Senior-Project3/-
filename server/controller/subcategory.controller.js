@@ -1,5 +1,5 @@
 const { models } = require('../models');
-const { SubCategory, Category } = models;
+const { SubCategory, Category, Product } = models;
 
 const getAllSubCategories = async (req, res) => {
   try {
@@ -18,10 +18,15 @@ const getAllSubCategories = async (req, res) => {
 const getSubCategoryById = async (req, res) => {
   try {
     const subCategory = await SubCategory.findByPk(req.params.id, {
-      include: [{
-        model: Category,
-        attributes: ['name', 'gender']
-      }]
+      include: [
+        {
+          model: Category,
+          attributes: ['name', 'gender']
+        },
+        {
+          model: Product
+        }
+      ]
     });
     if (!subCategory) {
       return res.status(404).json({ message: 'SubCategory not found' });
@@ -34,7 +39,7 @@ const getSubCategoryById = async (req, res) => {
 
 const createSubCategory = async (req, res) => {
   try {
-    const { name, description, categoryId } = req.body;
+    const { name, description, categoryId, image } = req.body;
     
     if (!name || !categoryId) {
       return res.status(400).json({ message: 'Name and categoryId are required' });
@@ -48,6 +53,7 @@ const createSubCategory = async (req, res) => {
     const subCategory = await SubCategory.create({
       name,
       description,
+      image,
       CategoryId: categoryId
     });
 
@@ -59,7 +65,7 @@ const createSubCategory = async (req, res) => {
 
 const updateSubCategory = async (req, res) => {
   try {
-    const { name, description, categoryId } = req.body;
+    const { name, description, categoryId, image } = req.body;
     const subCategory = await SubCategory.findByPk(req.params.id);
 
     if (!subCategory) {
@@ -75,7 +81,8 @@ const updateSubCategory = async (req, res) => {
 
     await subCategory.update({
       name: name || subCategory.name,
-      description: description || subCategory.description,
+      description: description !== undefined ? description : subCategory.description,
+      image: image !== undefined ? image : subCategory.image,
       CategoryId: categoryId || subCategory.CategoryId
     });
 
