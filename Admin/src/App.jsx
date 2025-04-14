@@ -1,6 +1,7 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 import { ThemeProvider } from "@/contexts/theme-context";
+import '../src/app/globals.css';
 
 import Layout from "../src/app/layout";
 import DashboardPage from "./app/dashbord/page";

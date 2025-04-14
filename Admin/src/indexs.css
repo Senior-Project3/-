@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
+/* @layer base {
     body {
         @apply [scrollbar-color:_#cbd5e1_transparent] dark:[scrollbar-color:_#334155_transparent];
     }
@@ -87,4 +87,4 @@
 
 .recharts-tooltip-item {
     @apply text-base font-medium !text-blue-500 dark:!text-blue-600;
-}
+} */

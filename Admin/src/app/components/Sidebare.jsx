@@ -1,77 +1,114 @@
 'use client';
 
-import { forwardRef } from "react";
-import Link from "next/link";
-import Image from "next/image";
-import { usePathname } from "next/navigation";
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { 
+  LayoutDashboard, 
+  Users, 
+  Package, 
+  PlusCircle, 
+  ClipboardList
+} from 'lucide-react';
 
-import { navbarLinks } from "../../constents/index";
-import { cn } from "@/utils/cn";
+const Sidebar = ({ collapsed }) => {
+  const pathname = usePathname();
+  const isActive = (path) => pathname === path;
 
-import PropTypes from "prop-types";
+  return (
+    <div className={`h-screen bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col transition-all duration-300 ${
+      collapsed ? 'w-20' : 'w-64'
+    }`}>
+      {/* Logo */}
+      <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+        <Link href="/" className="flex items-center">
+          {!collapsed && <span className="text-xl font-bold text-gray-800 dark:text-white">Clothes</span>}
+          {collapsed && <span className="text-xl font-bold text-gray-800 dark:text-white">C</span>}
+        </Link>
+      </div>
 
-export const Sidebar = forwardRef(({ collapsed }, ref) => {
-    const pathname = usePathname();
+      {/* Navigation */}
+      <nav className="flex-1 p-4">
+        <div className="space-y-1">
+          {!collapsed && (
+            <p className="px-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+              Dashboard
+            </p>
+          )}
+          <Link
+            href="/dashbord"
+            className={`flex items-center px-3 py-2 text-sm font-medium rounded-lg ${
+              isActive('/dashbord')
+                ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400'
+                : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
+            }`}
+          >
+            <LayoutDashboard className="h-5 w-5 mr-3" />
+            {!collapsed && 'Dashboard'}
+          </Link>
+        </div>
 
-    return (
-        <aside
-            ref={ref}
-            className={cn(
-                "fixed z-[100] flex h-full w-[240px] flex-col overflow-x-hidden border-r border-slate-300 bg-white [transition:_width_300ms_cubic-bezier(0.4,_0,_0.2,_1),_left_300ms_cubic-bezier(0.4,_0,_0.2,_1),_background-color_150ms_cubic-bezier(0.4,_0,_0.2,_1),_border_150ms_cubic-bezier(0.4,_0,_0.2,_1)] dark:border-slate-700 dark:bg-slate-900",
-                collapsed ? "md:w-[70px] md:items-center" : "md:w-[240px]",
-                collapsed ? "max-md:-left-full" : "max-md:left-0",
-            )}
-        >
-            <div className="flex gap-x-3 p-3">
-                <Image
-                    src="/logo-dark.svg"
-                    alt="Logoipsum"
-                    width={32}
-                    height={32}
-                    className="dark:hidden"
-                />
-                <Image
-                    src="/logo-light.svg"
-                    alt="Logoipsum"
-                    width={32}
-                    height={32}
-                    className="hidden dark:block"
-                />
-                {!collapsed && <p className="text-lg font-medium text-slate-900 transition-colors dark:text-slate-50">Clothes</p>}
-            </div>
-            <div className="flex w-full flex-col gap-y-4 overflow-y-auto overflow-x-hidden p-3 [scrollbar-width:_thin]">
-                {navbarLinks.map((navbarLink) => (
-                    <nav
-                        key={navbarLink.title}
-                        className={cn("sidebar-group", collapsed && "md:items-center")}
-                    >
-                        <p className={cn("sidebar-group-title", collapsed && "md:w-[45px]")}>{navbarLink.title}</p>
-                        {navbarLink.links.map((link) => (
-                            <Link
-                                key={link.label}
-                                href={link.path}
-                                className={cn(
-                                    "sidebar-item",
-                                    collapsed && "md:w-[45px]",
-                                    pathname === link.path && "bg-slate-100 dark:bg-slate-800"
-                                )}
-                            >
-                                <link.icon
-                                    size={22}
-                                    className="flex-shrink-0"
-                                />
-                                {!collapsed && <p className="whitespace-nowrap">{link.label}</p>}
-                            </Link>
-                        ))}
-                    </nav>
-                ))}
-            </div>
-        </aside>
-    );
-});
+        <div className="mt-8 space-y-1">
+          {!collapsed && (
+            <p className="px-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+              Customers
+            </p>
+          )}
+          <Link
+            href="/users"
+            className={`flex items-center px-3 py-2 text-sm font-medium rounded-lg ${
+              isActive('/users')
+                ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400'
+                : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
+            }`}
+          >
+            <Users className="h-5 w-5 mr-3" />
+            {!collapsed && 'Customers'}
+          </Link>
+        </div>
 
-Sidebar.displayName = "Sidebar";
-
-Sidebar.propTypes = {
-    collapsed: PropTypes.bool,
+        <div className="mt-8 space-y-1">
+          {!collapsed && (
+            <p className="px-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+              Products
+            </p>
+          )}
+          <Link
+            href="/products"
+            className={`flex items-center px-3 py-2 text-sm font-medium rounded-lg ${
+              isActive('/products')
+                ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400'
+                : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
+            }`}
+          >
+            <Package className="h-5 w-5 mr-3" />
+            {!collapsed && 'Products'}
+          </Link>
+          <Link
+            href="/addproduct"
+            className={`flex items-center px-3 py-2 text-sm font-medium rounded-lg ${
+              isActive('/addproduct')
+                ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400'
+                : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
+            }`}
+          >
+            <PlusCircle className="h-5 w-5 mr-3" />
+            {!collapsed && 'New product'}
+          </Link>
+          <Link
+            href="/inventory"
+            className={`flex items-center px-3 py-2 text-sm font-medium rounded-lg ${
+              isActive('/inventory')
+                ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400'
+                : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
+            }`}
+          >
+            <ClipboardList className="h-5 w-5 mr-3" />
+            {!collapsed && 'Inventory'}
+          </Link>
+        </div>
+      </nav>
+    </div>
+  );
 };
+
+export default Sidebar;
