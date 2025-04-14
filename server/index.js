@@ -6,7 +6,12 @@ const { syncDatabase } = require('./models');
 
 const PORT = process.env.PORT || 4000;
 
-app.use(cors());
+// Configure CORS to allow requests from the frontend
+app.use(cors({
+  origin: ['http://localhost:3000', 'http://localhost:3001'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true
+}));
 
 app.use(express.json());
 const productRouter = require("./routers/product.router.js")

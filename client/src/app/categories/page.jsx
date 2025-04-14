@@ -1,40 +1,75 @@
 import Link from 'next/link';
+import { getCategories } from '../lib/api';
 
-export default function CategoriesPage() {
-  const categories = [
-    {
-      id: 1,
-      name: "Men's Fashion",
-      slug: "men",
-      description: "Discover our collection of men's clothing, from casual to formal wear.",
-      color: "bg-blue-600",
-      items: "42 items"
-    },
-    {
-      id: 2,
-      name: "Women's Fashion",
-      slug: "women",
-      description: "Explore our stunning collection of women's clothing for every occasion.",
-      color: "bg-pink-600",
-      items: "56 items"
-    },
-    {
-      id: 3,
-      name: "Kids' Fashion",
-      slug: "kids",
-      description: "Adorable and comfortable clothing for kids of all ages.",
-      color: "bg-green-600",
-      items: "38 items"
-    },
-    {
-      id: 4,
-      name: "Accessories",
-      slug: "accessories",
-      description: "Complete your look with our range of stylish accessories.",
-      color: "bg-purple-600",
-      items: "27 items"
-    }
-  ];
+// This enables dynamic server rendering
+export const dynamic = 'force-dynamic';
+
+export default async function CategoriesPage() {
+  let categoriesData = [];
+  
+  try {
+    // Fetch categories from API
+    const apiCategories = await getCategories();
+    
+    // Group categories by gender to create our main navigation categories
+    const menCategories = apiCategories.filter(cat => cat.gender === 'mens');
+    const womenCategories = apiCategories.filter(cat => cat.gender === 'womens');
+    const kidsCategories = apiCategories.filter(cat => cat.gender === 'kids');
+    
+    // Create front-end category structure
+    categoriesData = [
+      {
+        id: 1,
+        name: "Men's Fashion",
+        slug: "men",
+        description: "Discover our collection of men's clothing, from casual to formal wear.",
+        color: "bg-blue-600",
+        items: `${menCategories.length} categories`,
+        image: menCategories[0]?.image || ""
+      },
+      {
+        id: 2,
+        name: "Women's Fashion",
+        slug: "women",
+        description: "Explore our stunning collection of women's clothing for every occasion.",
+        color: "bg-pink-600",
+        items: `${womenCategories.length} categories`,
+        image: womenCategories[0]?.image || ""
+      },
+      {
+        id: 3,
+        name: "Kids' Fashion",
+        slug: "kids",
+        description: "Adorable and comfortable clothing for kids of all ages.",
+        color: "bg-green-600",
+        items: `${kidsCategories.length} categories`,
+        image: kidsCategories[0]?.image || ""
+      },
+      {
+        id: 4,
+        name: "Accessories",
+        slug: "accessories",
+        description: "Complete your look with our range of stylish accessories.",
+        color: "bg-purple-600",
+        items: "Belts, Watches, Jewelry",
+        image: ""
+      }
+    ];
+  } catch (error) {
+    console.error("Failed to fetch categories:", error);
+    // Use default fallback data
+    categoriesData = [
+      {
+        id: 1,
+        name: "Men's Fashion",
+        slug: "men",
+        description: "Discover our collection of men's clothing, from casual to formal wear.",
+        color: "bg-blue-600",
+        items: "Loading..."
+      },
+      // ... other fallback categories ...
+    ];
+  }
 
   return (
     <div className="bg-gray-100 min-h-screen">
@@ -49,13 +84,22 @@ export default function CategoriesPage() {
         </div>
         
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-          {categories.map((category) => (
+          {categoriesData.map((category) => (
             <Link key={category.id} href={`/categories/${category.slug}`} className="block">
               <div className="flex flex-col md:flex-row rounded-lg shadow-lg overflow-hidden bg-white hover:shadow-xl transition-shadow duration-300">
                 <div className={`${category.color} w-full md:w-1/3 p-8 flex items-center justify-center`}>
-                  <h2 className="text-2xl font-bold text-white text-center">{category.name}</h2>
+                  {category.image ? (
+                    <img 
+                      src={category.image} 
+                      alt={category.name} 
+                      className="h-24 w-auto object-contain"
+                    />
+                  ) : (
+                    <h2 className="text-2xl font-bold text-white text-center">{category.name}</h2>
+                  )}
                 </div>
                 <div className="p-6 w-full md:w-2/3">
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">{category.name}</h3>
                   <p className="text-gray-600 mb-4">{category.description}</p>
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-500">{category.items}</span>

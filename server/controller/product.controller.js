@@ -126,4 +126,43 @@ module.exports = {
       res.status(500).json({ error: error.message });
     }
   },
+
+  getByGender: async (req, res) => {
+    try {
+      const gender = req.params.gender;
+      
+      if (!['mens', 'womens', 'kids'].includes(gender)) {
+        return res.status(400).json({ error: "Invalid gender. Must be 'mens', 'womens', or 'kids'." });
+      }
+      
+      // First find all categories of this gender
+      const categories = await models.Category.findAll({
+        where: { gender }
+      });
+      
+      const categoryIds = categories.map(cat => cat.id);
+      
+      // Then find all subcategories of these categories
+      const subcategories = await models.SubCategory.findAll({
+        where: { CategoryId: categoryIds }
+      });
+      
+      const subcategoryIds = subcategories.map(subcat => subcat.id);
+      
+      // Finally find all products in these subcategories
+      const products = await Product.findAll({
+        where: { SubCategoryId: subcategoryIds },
+        include: [{
+          model: models.SubCategory,
+          include: [{
+            model: models.Category
+          }]
+        }]
+      });
+      
+      res.json(products);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  },
 };
