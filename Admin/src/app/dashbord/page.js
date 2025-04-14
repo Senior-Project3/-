@@ -5,7 +5,7 @@ import {
   Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis
 } from "recharts";
 import { useTheme } from "@/hooks/use-theme";
-import { Footer } from "../components/Footer";
+
 import { CreditCard, DollarSign, Package, Users, TrendingUp } from "lucide-react";
 
 const DashboardPage = () => {
@@ -92,7 +92,7 @@ const DashboardPage = () => {
         </div>
       </div>
 
-      <Footer />
+    
     </div>
   );
 };

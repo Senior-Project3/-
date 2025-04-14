@@ -1,7 +1,7 @@
 "use client"
 import { useEffect, useState } from "react"
 import axios from "axios"
-import { FaEdit, FaTrash } from "react-icons/fa"
+import { FaEdit, FaTrash , FaArrowLeft, FaArrowRight} from "react-icons/fa"
 
 const Products = () => {
   const [data, setData] = useState([])
@@ -11,7 +11,7 @@ const Products = () => {
   const [refetch, setRefetch] = useState(true)
   const [currentPage, setCurrentPage] = useState(1)
   const [searchQuery, setSearchQuery] = useState("")
-  const itemsPerPage = 7 // Changed to match the image showing 7 items per page
+  const itemsPerPage = 10
 
   useEffect(() => {
     fetchData()
@@ -84,64 +84,64 @@ const Products = () => {
   }
 
   // Sample data to match the image
-  const sampleProducts = [
-    {
-      id: 1,
-      name: "Classic White T-Shirt",
-      description: "A comfortable and versatile white t-shirt made from 100% cotton",
-      price: 29.99,
-      stock: 10,
-      image: "/placeholder.svg?height=60&width=60",
-    },
-    {
-      id: 2,
-      name: "Black Graphic T-Shirt",
-      description: "Stylish black t-shirt with a unique graphic design",
-      price: 34.99,
-      stock: 15,
-      image: "/placeholder.svg?height=60&width=60",
-    },
-    {
-      id: 3,
-      name: "Classic T-Shirt",
-      description: "A comfortable t-shirt made from 100% cotton",
-      price: 39.99,
-      stock: 8,
-      image: "/placeholder.svg?height=60&width=60",
-    },
-    {
-      id: 4,
-      name: "Blue Oxford Shirt",
-      description: "Classic blue oxford shirt for a preppy look",
-      price: 49.99,
-      stock: 12,
-      image: "/placeholder.svg?height=60&width=60",
-    },
-    {
-      id: 5,
-      name: "White Dress Shirt",
-      description: "Formal white dress shirt for special occasions",
-      price: 59.99,
-      stock: 6,
-      image: "/placeholder.svg?height=60&width=60",
-    },
-    {
-      id: 6,
-      name: "Slim Fit Blue Jeans",
-      description: "Modern slim fit jeans in classic blue denim",
-      price: 79.99,
-      stock: 20,
-      image: "/placeholder.svg?height=60&width=60",
-    },
-    {
-      id: 7,
-      name: "Regular Fit Black Jeans",
-      description: "Classic regular fit jeans in black denim",
-      price: 69.99,
-      stock: 18,
-      image: "/placeholder.svg?height=60&width=60",
-    },
-  ]
+  // const sampleProducts = [
+  //   {
+  //     id: 1,
+  //     name: "Classic White T-Shirt",
+  //     description: "A comfortable and versatile white t-shirt made from 100% cotton",
+  //     price: 29.99,
+  //     stock: 10,
+  //     image: "/placeholder.svg?height=60&width=60",
+  //   },
+  //   {
+  //     id: 2,
+  //     name: "Black Graphic T-Shirt",
+  //     description: "Stylish black t-shirt with a unique graphic design",
+  //     price: 34.99,
+  //     stock: 15,
+  //     image: "/placeholder.svg?height=60&width=60",
+  //   },
+  //   {
+  //     id: 3,
+  //     name: "Classic T-Shirt",
+  //     description: "A comfortable t-shirt made from 100% cotton",
+  //     price: 39.99,
+  //     stock: 8,
+  //     image: "/placeholder.svg?height=60&width=60",
+  //   },
+  //   {
+  //     id: 4,
+  //     name: "Blue Oxford Shirt",
+  //     description: "Classic blue oxford shirt for a preppy look",
+  //     price: 49.99,
+  //     stock: 12,
+  //     image: "/placeholder.svg?height=60&width=60",
+  //   },
+  //   {
+  //     id: 5,
+  //     name: "White Dress Shirt",
+  //     description: "Formal white dress shirt for special occasions",
+  //     price: 59.99,
+  //     stock: 6,
+  //     image: "/placeholder.svg?height=60&width=60",
+  //   },
+  //   {
+  //     id: 6,
+  //     name: "Slim Fit Blue Jeans",
+  //     description: "Modern slim fit jeans in classic blue denim",
+  //     price: 79.99,
+  //     stock: 20,
+  //     image: "/placeholder.svg?height=60&width=60",
+  //   },
+  //   {
+  //     id: 7,
+  //     name: "Regular Fit Black Jeans",
+  //     description: "Classic regular fit jeans in black denim",
+  //     price: 69.99,
+  //     stock: 18,
+  //     image: "/placeholder.svg?height=60&width=60",
+  //   },
+  // ]
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -199,16 +199,16 @@ const Products = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {sampleProducts.map((product, index) => (
-                <tr key={product.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{index + 1}</td>
+              {currentProducts.map((product, index) => (
+                <tr key={product.id || index} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{(currentPage - 1) * itemsPerPage + index + 1}</td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="flex-shrink-0 h-12 w-12">
                         <img
                           className="h-12 w-12 rounded-md object-cover"
                           src={product.image || "/placeholder.svg"}
-                          alt=""
+                          alt={product.name}
                         />
                       </div>
                       <div className="ml-4">
@@ -218,7 +218,10 @@ const Products = () => {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">TND {product.price.toFixed(2)}</div>
+                    <td className="text-sm font-medium text-gray-900">TND {parseFloat(product.price).toFixed(2)}</td>
+                    <span className={`${product.stock > 0 ? "text-green-600" : "text-red-600"} font-semibold`}>
+                                    {product.stock > 0 ? "In Stock" : "Out of Stock"}
+                    </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className="px-2 inline-flex text-sm leading-5 font-semibold text-green-600">In Stock</span>
@@ -238,7 +241,7 @@ const Products = () => {
         </div>
 
         {/* Pagination */}
-        <div className="mt-4 flex justify-center">
+        {/* <div className="mt-4 flex justify-center">
           {Array.from({ length: totalPages }, (_, i) => (
             <button
               key={i}
@@ -250,7 +253,32 @@ const Products = () => {
               {i + 1}
             </button>
           ))}
-        </div>
+        </div> */}
+         <button
+                    onClick={() => goToPage(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className="rounded bg-gray-300 p-2 hover:bg-gray-400 disabled:opacity-50"
+                >
+                    <FaArrowLeft />
+                </button>
+                <div className="flex gap-2">
+                    {[...Array(totalPages)].map((_, index) => (
+                        <button
+                            key={index}
+                            onClick={() => goToPage(index + 1)}
+                            className={`rounded px-4 py-2 ${currentPage === index + 1 ? "bg-blue-600 text-white" : "bg-gray-200 hover:bg-gray-300"}`}
+                        >
+                            {index + 1}
+                        </button>
+                    ))}
+                </div>
+                <button
+                    onClick={() => goToPage(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className="rounded bg-gray-300 p-2 hover:bg-gray-400 disabled:opacity-50"
+                >
+                    <FaArrowRight />
+                </button>
       </div>
 
       {/* Edit Modal */}
