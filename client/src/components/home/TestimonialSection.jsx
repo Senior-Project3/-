@@ -6,19 +6,19 @@ const TestimonialSection = () => {
     {
       id: 1,
       content: "LABESNI has completely transformed my wardrobe. The quality of their clothes is exceptional and the styles are always on trend.",
-      author: "Sara Ben Ali",
+      author: "hamma jemai",
       role: "Regular Customer",
     },
     {
       id: 2,
       content: "I love shopping for my entire family at LABESNI. They have something for everyone, and their kids' collection is adorable!",
-      author: "Ahmed Trabelsi",
-      role: "Parent of Three",
+      author: "wiem hajri",
+      role: "Regular Customer",
     },
     {
       id: 3,
       content: "The customer service at LABESNI is impeccable. They went above and beyond to help me find the perfect outfit for a special occasion.",
-      author: "Leila Mansour",
+      author: "habiba ",
       role: "Fashion Enthusiast",
     },
   ];

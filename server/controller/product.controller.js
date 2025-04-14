@@ -19,6 +19,25 @@ module.exports = {
       res.status(500).json({ error: error.message });
     }
   },
+  getByCategory: async (req, res) => {
+    try {
+      const { categorySlug } = req.params;
+      const category = await Category.findOne({ where: { slug: categorySlug } });
+  
+      if (!category) {
+        return res.status(404).json({ message: 'Category not found' });
+      }
+  
+      const products = await Product.findAll({
+        where: { CategoryId: category.id },
+      });
+  
+      res.status(200).json(products);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  },
+
 
   getById: async (req, res) => {
     try {
@@ -75,92 +94,6 @@ module.exports = {
 
       await product.destroy();
       res.json({ message: "Product deleted successfully" });
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
-  },
-
-  getBySubcategory: async (req, res) => {
-    try {
-      const subcategoryId = req.params.subcategoryId;
-      const products = await Product.findAll({
-        where: { SubCategoryId: subcategoryId },
-        include: [{
-          model: models.SubCategory,
-          include: [{
-            model: models.Category
-          }]
-        }]
-      });
-      
-      res.json(products);
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
-  },
-  
-  getByCategoryId: async (req, res) => {
-    try {
-      const categoryId = req.params.categoryId;
-      
-      // Find all subcategories of this category
-      const subcategories = await models.SubCategory.findAll({
-        where: { CategoryId: categoryId }
-      });
-      
-      const subcategoryIds = subcategories.map(subcat => subcat.id);
-      
-      // Find all products in these subcategories
-      const products = await Product.findAll({
-        where: { SubCategoryId: subcategoryIds },
-        include: [{
-          model: models.SubCategory,
-          include: [{
-            model: models.Category
-          }]
-        }]
-      });
-      
-      res.json(products);
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
-  },
-
-  getByGender: async (req, res) => {
-    try {
-      const gender = req.params.gender;
-      
-      if (!['mens', 'womens', 'kids'].includes(gender)) {
-        return res.status(400).json({ error: "Invalid gender. Must be 'mens', 'womens', or 'kids'." });
-      }
-      
-      // First find all categories of this gender
-      const categories = await models.Category.findAll({
-        where: { gender }
-      });
-      
-      const categoryIds = categories.map(cat => cat.id);
-      
-      // Then find all subcategories of these categories
-      const subcategories = await models.SubCategory.findAll({
-        where: { CategoryId: categoryIds }
-      });
-      
-      const subcategoryIds = subcategories.map(subcat => subcat.id);
-      
-      // Finally find all products in these subcategories
-      const products = await Product.findAll({
-        where: { SubCategoryId: subcategoryIds },
-        include: [{
-          model: models.SubCategory,
-          include: [{
-            model: models.Category
-          }]
-        }]
-      });
-      
-      res.json(products);
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
