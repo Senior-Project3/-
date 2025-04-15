@@ -1,4 +1,4 @@
-/* Categories.css - Professional styling for LABESNI category section */
+/* /* Categories.css - Professional styling for LABESNI category section
 
 /* Category Section Styles */
 .category-section {
@@ -298,4 +298,4 @@
 
 .category-card:nth-child(4) {
   animation-delay: 0.4s;
-} 
+}   

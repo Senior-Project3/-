@@ -340,7 +340,9 @@ const CategoryPage = () => {
                     alt={product.name}
                     style={styles.image}
                   />
-                  <div style={styles.priceBadge}>${product.price.toFixed(2)}</div>
+                  <div style={styles.priceBadge}>
+                    ${Number(product.price).toFixed(2)}
+                  </div>
                 </div>
                 <div style={styles.cardContent}>
                   <h2 style={styles.productName}>{product.name}</h2>
@@ -362,109 +364,145 @@ const CategoryPage = () => {
     </div>
   );
 };
-
 const styles = {
-  pageContainer: {
-    backgroundColor: '#f9fafb',
-    minHeight: '100vh',
-    padding: '2rem 0',
-  },
-  contentContainer: {
-    maxWidth: '1280px',
-    margin: '0 auto',
-    padding: '0 1rem',
-  },
-  title: {
-    fontSize: '2.5rem',
-    fontWeight: '800',
-    color: '#1f2937',
-    marginBottom: '1rem',
-    textTransform: 'capitalize',
-  },
-  subtitle: {
-    fontSize: '1.125rem',
-    color: '#4b5563',
-    marginBottom: '2rem',
-  },
-  categoryName: {
-    textTransform: 'capitalize',
-    fontWeight: '600',
-  },
-  loadingText: {
-    fontSize: '1.125rem',
-    color: '#4b5563',
-  },
-  grid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(1, 1fr)',
-    gap: '2rem',
-    '@media (min-width: 768px)': {
-      gridTemplateColumns: 'repeat(3, 1fr)',
+    pageContainer: {
+      backgroundColor: '#f9fafb',
+      minHeight: '100vh',
+      padding: '2rem 0',
     },
-  },
-  card: {
-    backgroundColor: '#fff',
-    borderRadius: '0.5rem',
-    overflow: 'hidden',
-    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-    transition: 'all 0.3s ease',
-  },
-  imageContainer: {
-    position: 'relative',
-    height: '12rem',
-    overflow: 'hidden',
-  },
-  image: {
-    width: '100%',
-    height: '100%',
-    objectFit: 'cover',
-  },
-  priceBadge: {
-    position: 'absolute',
-    top: '0.5rem',
-    right: '0.5rem',
-    backgroundColor: '#14b8a6',
-    color: '#fff',
-    fontSize: '0.875rem',
-    fontWeight: '600',
-    padding: '0.25rem 0.5rem',
-    borderRadius: '0.25rem',
-  },
-  cardContent: {
-    padding: '1rem',
-  },
-  productName: {
-    fontSize: '1.25rem',
-    fontWeight: '700',
-    color: '#1f2937',
-    marginBottom: '0.5rem',
-  },
-  productDescription: {
-    fontSize: '0.875rem',
-    color: '#6b7280',
-    marginBottom: '1rem',
-  },
-  cardFooter: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  detailsLink: {
-    fontSize: '0.875rem',
-    color: '#14b8a6',
-    textDecoration: 'none',
-    fontWeight: '600',
-  },
-  addToCartButton: {
-    backgroundColor: '#14b8a6',
-    color: '#fff',
-    fontSize: '0.875rem',
-    padding: '0.5rem 1rem',
-    borderRadius: '0.375rem',
-    border: 'none',
-    cursor: 'pointer',
-    transition: 'background-color 0.3s ease',
-  },
-};
+    contentContainer: {
+      maxWidth: '1280px',
+      margin: '0 auto',
+      padding: '0 1rem',
+    },
+    title: {
+      fontSize: '2.5rem',
+      fontWeight: '800',
+      color: '#1f2937',
+      marginBottom: '1rem',
+      textTransform: 'capitalize',
+      textAlign: 'center',
+    },
+    subtitle: {
+      fontSize: '1.125rem',
+      color: '#4b5563',
+      marginBottom: '2rem',
+      textAlign: 'center',
+    },
+    categoryName: {
+      textTransform: 'capitalize',
+      fontWeight: '600',
+      color: '#14b8a6',
+    },
+    loadingText: {
+      fontSize: '1.125rem',
+      color: '#4b5563',
+      textAlign: 'center',
+    },
+    grid: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(1, 1fr)',
+      gap: '2rem',
+      '@media (min-width: 640px)': {
+        gridTemplateColumns: 'repeat(2, 1fr)',
+      },
+      '@media (min-width: 1024px)': {
+        gridTemplateColumns: 'repeat(4, 1fr)',
+      },
+    },
+    card: {
+      backgroundColor: '#fff',
+      borderRadius: '0.5rem',
+      overflow: 'hidden',
+      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+      transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+      cursor: 'pointer',
+    },
+    cardHover: {
+      transform: 'translateY(-5px)',
+      boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+    },
+    imageContainer: {
+      position: 'relative',
+      width: '100%',
+      paddingTop: '100%',
+      overflow: 'hidden',
+      backgroundColor: '#f3f4f6',
+    },
+    image: {
+      position: 'absolute',
+      top: '50%',
+      left: '50%',
+      width: '100%',
+      height: '100%',
+      objectFit: 'cover',
+      transform: 'translate(-50%, -50%)',
+      transition: 'transform 0.5s ease',
+    },
+    priceBadge: {
+      position: 'absolute',
+      top: '0.75rem',
+      right: '0.75rem',
+      backgroundColor: '#14b8a6',
+      color: '#fff',
+      fontSize: '0.875rem',
+      fontWeight: '600',
+      padding: '0.25rem 0.75rem',
+      borderRadius: '9999px',
+      zIndex: 1,
+    },
+    cardContent: {
+      padding: '1rem',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      textAlign: 'center',
+    },
+    productName: {
+      fontSize: '1.125rem',
+      fontWeight: '700',
+      color: '#1f2937',
+      marginBottom: '0.5rem',
+      whiteSpace: 'nowrap',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+    },
+    productDescription: {
+      fontSize: '0.875rem',
+      color: '#6b7280',
+      marginBottom: '1rem',
+      lineHeight: '1.5',
+    },
+    cardFooter: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      width: '100%',
+      marginTop: 'auto',
+    },
+    detailsLink: {
+      fontSize: '0.875rem',
+      color: '#14b8a6',
+      textDecoration: 'none',
+      fontWeight: '600',
+      transition: 'color 0.3s ease',
+    },
+    detailsLinkHover: {
+      color: '#0d9488',
+    },
+    addToCartButton: {
+      backgroundColor: '#14b8a6',
+      color: '#fff',
+      fontSize: '0.875rem',
+      padding: '0.5rem 1rem',
+      borderRadius: '0.375rem',
+      border: 'none',
+      cursor: 'pointer',
+      transition: 'background-color 0.3s ease',
+    },
+    addToCartButtonHover: {
+      backgroundColor: '#0d9488',
+    },
+  };
 
 export default CategoryPage;
