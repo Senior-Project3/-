@@ -1,4 +1,4 @@
-const { models: { Product } } = require("../models/index.js");
+const { models: { Product,Category,SubCategory } } = require("../models/index.js");
 const { models } = require("../models/index.js");
 
 
@@ -22,14 +22,21 @@ module.exports = {
   getByCategory: async (req, res) => {
     try {
       const { categorySlug } = req.params;
-      const category = await Category.findOne({ where: { slug: categorySlug } });
-  
+      // const category = await Category.findOne({ where: { slug: categorySlug } });
+      const category = await Category.findOne({ where: { gender: categorySlug } })  
       if (!category) {
         return res.status(404).json({ message: 'Category not found' });
       }
   
-      const products = await Product.findAll({
+      const subcategories = await SubCategory.findAll({
         where: { CategoryId: category.id },
+      });
+  
+      const subcategoryIds = subcategories.map(sub => sub.id);
+  
+      // Step 3: Find products in these subcategories
+      const products = await Product.findAll({
+        where: { SubCategoryId: subcategoryIds },
       });
   
       res.status(200).json(products);

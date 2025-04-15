@@ -35,10 +35,10 @@ const Navbar = () => {
         </Link>
         
         <div className="navbar-links">
-        <Link href="/categories/men" className="navbar-link">
+        <Link href="/categories/mens" className="navbar-link">
   Men
 </Link>
-<Link href="/categories/women" className="navbar-link">
+<Link href="/categories/womens" className="navbar-link">
   Women
 </Link>
 <Link href="/categories/kids" className="navbar-link">

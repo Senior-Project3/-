@@ -7,7 +7,7 @@ Router.get("/:id", getById)
 Router.post("/add",create)
 Router.delete("/deleteone/:productId",remove)
 Router.put("/update/:productId",update)
-Router.get("/category/:categoryId", getByCategory)
+Router.get("/category/:categorySlug", getByCategory)
 
 
 
