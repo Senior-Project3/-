@@ -51,7 +51,6 @@ const DashboardPage = () => {
   const fetchOrders = async () => {
     try {
       const res = await axios.get('http://localhost:4000/api/orders/');
-      console.log('Fetched orders:', res.data);
       setOrders(Array.isArray(res.data) ? res.data : []);
     } catch (error) {
       console.error('Failed to fetch orders:', error);
@@ -73,7 +72,6 @@ const DashboardPage = () => {
     fetchData();
   }, []);
 
-  // Calculate statistics
   const totalProducts = products.length;
   const totalSoldProducts = products.reduce(
     (sum, p) => sum + (parseInt(p.sales) || 0),
@@ -84,23 +82,32 @@ const DashboardPage = () => {
     0
   );
 
-  // Prepare chart data
   const overviewData = products.slice(0, 7).map((p, idx) => ({
     name: `P${idx + 1}`,
     total: parseFloat(p.price || 0),
     sales: parseInt(p.sales || 0),
   }));
 
-  // Calculate order status counts
-  const pendingOrders = orders.filter(order => order.status?.toLowerCase() === 'pending').length;
-  const deliveredOrders = orders.filter(order => order.status?.toLowerCase() === 'delivered').length;
   const totalOrders = orders.length;
 
-  // Prepare data for PieChart
-  const orderStatusData = [
-    { id: 0, value: pendingOrders, label: 'Pending', color: '#FCD34D' },
-    { id: 1, value: deliveredOrders, label: 'Delivered', color: '#34D399' },
+  // Generate dynamic order status data
+  const statusCounts = orders.reduce((acc, order) => {
+    const status = order.status?.toLowerCase() || 'unknown';
+    acc[status] = (acc[status] || 0) + 1;
+    return acc;
+  }, {});
+
+  const colors = [
+    '#FCD34D', '#34D399', '#60A5FA', '#F87171', '#C084FC',
+    '#FBBF24', '#2DD4BF', '#4ADE80', '#818CF8', '#F472B6',
   ];
+
+  const orderStatusData = Object.entries(statusCounts).map(([status, value], index) => ({
+    id: index,
+    value,
+    label: status.charAt(0).toUpperCase() + status.slice(1),
+    color: colors[index % colors.length],
+  }));
 
   if (loading) {
     return (
@@ -209,12 +216,12 @@ const DashboardPage = () => {
           <h2 className="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-4">
             Order Status
           </h2>
-          <Box sx={{ 
-            flexGrow: 1, 
-            minHeight: '300px', 
-            display: 'flex', 
-            flexDirection: 'column', 
-            alignItems: 'center', 
+          <Box sx={{
+            flexGrow: 1,
+            minHeight: '300px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
             justifyContent: 'center',
             '& .MuiChartsLegend-mark': {
               rx: '8px',
@@ -228,7 +235,7 @@ const DashboardPage = () => {
                     data: orderStatusData,
                     highlightScope: { faded: 'global', highlighted: 'item' },
                     faded: { innerRadius: 30, additionalRadius: -30 },
-                    valueFormatter: (item) => 
+                    valueFormatter: (item) =>
                       `${item.label}: ${((item.value / totalOrders) * 100).toFixed(1)}%`,
                   },
                 ]}
@@ -254,7 +261,6 @@ const DashboardPage = () => {
   );
 };
 
-// StatsCard Component
 const StatsCard = ({ icon, title, value }) => (
   <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
     <div className="flex items-center justify-between mb-4">
