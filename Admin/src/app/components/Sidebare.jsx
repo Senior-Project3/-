@@ -105,6 +105,25 @@ const Sidebar = ({ collapsed }) => {
             <ClipboardList className="h-5 w-5 mr-3" />
             {!collapsed && 'Inventory'}
           </Link>
+          <div className="mt-8 space-y-1">
+          {!collapsed && (
+            <p className="px-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+              Customers
+            </p>
+          )}
+
+          <Link
+            href="/orders"
+            className={`flex items-center px-3 py-2 text-sm font-medium rounded-lg ${
+              isActive('/orders')
+                ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400'
+                : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
+            }`}
+          >
+            <orders className="h-5 w-5 mr-3" />
+            {!collapsed && 'orders'}
+          </Link>
+        </div>
         </div>
       </nav>
     </div>

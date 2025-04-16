@@ -15,6 +15,7 @@ const subcategoryRouter = require("./routers/subcategory.router.js")
 const cartRouter = require("./routers/cart.router.js")
 const paymentRouter = require("./routers/payment.router.js")
 const userRouter = require("./routers/user.router.js")
+const orderRouter = require("./routers/order.router.js")
 
 // Test route
 app.get('/', (req, res) => {
@@ -27,6 +28,7 @@ app.use("/api/subcategories", subcategoryRouter)
 app.use("/api/cart", cartRouter)
 app.use("/api", paymentRouter)
 app.use("/api/users", userRouter)
+app.use("/api/orders", orderRouter)
 
 const startServer = async () => {
   try {
