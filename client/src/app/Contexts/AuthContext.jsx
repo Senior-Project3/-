@@ -87,7 +87,7 @@ export const AuthProvider = ({ children }) => {
         const { token, user } = response.data;
         Cookies.set('token', token);
         setUser(user);
-        router.push('/home');
+        router.push('/');
         return { success: true };
       } else {
         return { 
@@ -128,7 +128,7 @@ export const AuthProvider = ({ children }) => {
         const { token, user } = response.data;
         Cookies.set('token', token);
         setUser(user);
-        router.push('/home');
+        router.push('/');
         return { success: true };
       } else {
         return { 

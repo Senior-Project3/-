@@ -2,14 +2,20 @@
 module.exports = {
   darkMode: ["class"],
   content: [
-    "./app/**/*.{js,ts,jsx,tsx,mdx}",
-    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./pages/**/*.{js,jsx}",
+    "./components/**/*.{js,jsx}",
+    "./app/**/*.{js,jsx}",
+    "./src/**/*.{js,jsx}",
     "*.{js,ts,jsx,tsx,mdx}",
-    "app/**/*.{ts,tsx}",
-    "components/**/*.{ts,tsx}",
   ],
   theme: {
+    container: {
+      center: true,
+      padding: "2rem",
+      screens: {
+        "2xl": "1400px",
+      },
+    },
     extend: {
       colors: {
         border: "hsl(var(--border))",
@@ -45,26 +51,52 @@ module.exports = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        rose: {
-          50: "#fff1f2",
-          100: "#ffe4e6",
-          200: "#fecdd3",
-          300: "#fda4af",
-          400: "#fb7185",
-          500: "#f43f5e",
-          600: "#e11d48",
-          700: "#be123c",
-          800: "#9f1239",
-          900: "#881337",
-          950: "#4c0519",
+        // Custom colors for our theme
+        beige: {
+          50: "#fdf8f6",
+          100: "#f2e8e5",
+          200: "#eaddd7",
+          300: "#e0cec7",
+          400: "#d2bab0",
+          500: "#bfa094",
+          600: "#a18072",
+          700: "#977669",
+          800: "#846358",
+          900: "#43302b",
         },
-        borderRadius: {
-          lg: "var(--radius)",
-          md: "calc(var(--radius) - 2px)",
-          sm: "calc(var(--radius) - 4px)",
+        pink: {
+          50: "#fdf2f8",
+          100: "#fce7f3",
+          200: "#fbcfe8",
+          300: "#f9a8d4",
+          400: "#f472b6",
+          500: "#ec4899",
+          600: "#db2777",
+          700: "#be185d",
+          800: "#9d174d",
+          900: "#831843",
         },
+      },
+      borderRadius: {
+        lg: "var(--radius)",
+        md: "calc(var(--radius) - 2px)",
+        sm: "calc(var(--radius) - 4px)",
+      },
+      keyframes: {
+        "accordion-down": {
+          from: { height: 0 },
+          to: { height: "var(--radix-accordion-content-height)" },
+        },
+        "accordion-up": {
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: 0 },
+        },
+      },
+      animation: {
+        "accordion-down": "accordion-down 0.2s ease-out",
+        "accordion-up": "accordion-up 0.2s ease-out",
       },
     },
   },
-  plugins: [require("@tailwindcss/forms"), require("@tailwindcss/aspect-ratio"), require("tailwindcss-animate")],
+  plugins: [require("tailwindcss-animate")],
 }

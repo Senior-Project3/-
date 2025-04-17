@@ -1,22 +1,57 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { ShoppingBag, Search, User, Menu, X } from 'lucide-react';
 import { useAuth } from '../Contexts/AuthContext';
 import { motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Cookies from 'js-cookie';
 
+// Sample products data - in a real app, this would come from your API
+const allProducts = [
+  {
+    id: 1,
+    name: "Men's Casual Shirt",
+    price: 49.99,
+    image: "/images/soonnoon.jpg",
+    category: "men",
+    description: "Comfortable casual shirt for men"
+  },
+  {
+    id: 2,
+    name: "Women's Summer Dress",
+    price: 59.99,
+    image: "/images/download.jpg",
+    category: "women",
+    description: "Elegant summer dress for women"
+  },
+  {
+    id: 3,
+    name: "Kids' Play Set",
+    price: 39.99,
+    image: "/images/kids-category.jpg",
+    category: "kids",
+    description: "Fun play set for kids"
+  },
+  // Add more products as needed
+];
+
 export default function ProductsPage() {
+  const { user, isAuthenticated } = useAuth();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const searchParams = useSearchParams();
+  const category = searchParams.get('category');
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { isAuthenticated } = useAuth();
   const [hoveredProduct, setHoveredProduct] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
+  const [filteredProducts, setFilteredProducts] = useState([]);
 
   const itemsPerPage = 8;
 
@@ -46,6 +81,33 @@ export default function ProductsPage() {
 
     fetchData();
   }, []);
+
+  useEffect(() => {
+    let filtered = products;
+    
+    // Filter by URL category parameter
+    if (category) {
+      filtered = filtered.filter(product => 
+        product.SubCategory?.Category?.gender === category
+      );
+    }
+    
+    // Filter by selected category
+    if (selectedCategory) {
+      filtered = filtered.filter(product => 
+        product.SubCategory?.Category?.id === selectedCategory
+      );
+    }
+    
+    // Filter by search query
+    if (searchQuery) {
+      filtered = filtered.filter(product => 
+        product.name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    setFilteredProducts(filtered);
+  }, [products, category, selectedCategory, searchQuery]);
 
   const handleAddToCart = async (productId, e) => {
     e.preventDefault();
@@ -95,14 +157,6 @@ export default function ProductsPage() {
     setCurrentPage(1);
   };
 
-  const filteredProducts = products.filter(product => {
-    const categoryMatch = selectedCategory
-      ? product.SubCategory?.Category?.id === selectedCategory
-      : true;
-    const searchMatch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
-    return categoryMatch && searchMatch;
-  });
-
   const indexOfLastProduct = currentPage * itemsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - itemsPerPage;
   const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
@@ -113,6 +167,15 @@ export default function ProductsPage() {
     } else if (direction === 'prev' && currentPage > 1) {
       setCurrentPage(prev => prev - 1);
     }
+  };
+
+  // Update the title based on the category
+  const getCategoryTitle = () => {
+    if (category) {
+      const categoryObj = categories.find(c => c.gender === category);
+      return categoryObj ? `${categoryObj.name} Collection` : 'All Products';
+    }
+    return 'All Products';
   };
 
   if (loading) {
@@ -135,135 +198,191 @@ export default function ProductsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white pt-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Our Products</h1>
+    <div className="min-h-screen">
+      {/* Navigation Bar */}
+      <nav className="bg-white/90 backdrop-blur-md fixed w-full z-50 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between h-16">
+            {/* Logo and Brand */}
+            <div className="flex items-center">
+              <Link href="/" className="flex items-center">
+                <ShoppingBag className="h-8 w-8 text-teal-500" />
+                <span className="ml-2 text-xl font-bold bg-gradient-to-r from-teal-600 to-emerald-600 bg-clip-text text-transparent">
+                  Labbasni
+                </span>
+              </Link>
+            </div>
 
-        {/* Category Filters */}
-        <div className="mb-6 flex flex-wrap gap-2">
-          <button
-            onClick={() => setSelectedCategory('')}
-            className={`px-4 py-2 rounded-md text-sm font-medium ${
-              selectedCategory === '' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-900'
-            } hover:bg-indigo-700`}
-          >
-            All Products
-          </button>
-          {categories.map(category => (
-            <button
-              key={category.id}
-              onClick={() => setSelectedCategory(category.id)}
-              className={`px-4 py-2 rounded-md text-sm font-medium ${
-                selectedCategory === category.id ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-900'
-              } hover:bg-indigo-700`}
-            >
-              {category.name}
-            </button>
-          ))}
-        </div>
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center space-x-8">
+              <Link href="/products" className="text-gray-700 hover:text-teal-600 transition-colors">
+                Products
+              </Link>
+              <Link href="/features" className="text-gray-700 hover:text-teal-600 transition-colors">
+                Features
+              </Link>
+              <Link href="/about" className="text-gray-700 hover:text-teal-600 transition-colors">
+                About Us
+              </Link>
+            </div>
 
-        {/* Search Bar */}
-        <div className="mb-6 flex justify-center">
-          <div className="relative w-full sm:w-1/2">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={handleSearchChange}
-              placeholder="Search products..."
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-black placeholder-gray-400"
-            />
+            {/* User Actions */}
+            <div className="flex items-center space-x-4">
+              <Link href="/cart" className="text-gray-700 hover:text-teal-600 transition-colors">
+                <ShoppingBag className="h-6 w-6" />
+              </Link>
+
+              {isAuthenticated ? (
+                <Link href="/profile" className="text-gray-700 hover:text-teal-600 transition-colors">
+                  <User className="h-6 w-6" />
+                </Link>
+              ) : (
+                <Link href="/login" className="text-gray-700 hover:text-teal-600 transition-colors">
+                  <User className="h-6 w-6" />
+                </Link>
+              )}
+
+              {/* Mobile menu button */}
+              <button
+                className="md:hidden text-gray-700 hover:text-teal-600 transition-colors"
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+              >
+                {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Product Grid */}
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {currentProducts.map((product, index) => (
-            <motion.div
-              key={product.id}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: index * 0.05, duration: 0.3 }}
-              className="h-full"
-              onMouseEnter={() => setHoveredProduct(product.id)}
-              onMouseLeave={() => setHoveredProduct(null)}
+        {/* Mobile Navigation */}
+        {isMenuOpen && (
+          <div className="md:hidden bg-white border-t border-gray-200">
+            <div className="px-4 py-2 space-y-2">
+              <Link href="/products" className="block text-gray-700 hover:text-teal-600 transition-colors">
+                Products
+              </Link>
+              <Link href="/features" className="block text-gray-700 hover:text-teal-600 transition-colors">
+                Features
+              </Link>
+              <Link href="/about" className="block text-gray-700 hover:text-teal-600 transition-colors">
+                About Us
+              </Link>
+            </div>
+          </div>
+        )}
+      </nav>
+
+      {/* Products Section */}
+      <div className="pt-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Category Title */}
+          <h1 className="text-3xl font-bold text-gray-900 mb-8">
+            {getCategoryTitle()}
+          </h1>
+
+          {/* Category Filters */}
+          <div className="mb-6 flex flex-wrap gap-2">
+            <Link
+              href="/products"
+              className={`px-4 py-2 rounded-md text-sm font-medium ${
+                !selectedCategory ? 'bg-teal-600 text-white' : 'bg-gray-200 text-gray-900'
+              } hover:bg-teal-700 transition-colors`}
             >
+              All Products
+            </Link>
+            {categories.map(category => (
               <Link
-                href={`/products/${product.id}`}
-                className="group flex flex-col bg-white rounded-lg shadow hover:shadow-lg transition duration-300 overflow-hidden min-h-[400px] h-full relative"
+                key={category.id}
+                href={`/products?category=${category.gender}`}
+                className={`px-4 py-2 rounded-md text-sm font-medium ${
+                  selectedCategory === category.id ? 'bg-teal-600 text-white' : 'bg-gray-200 text-gray-900'
+                } hover:bg-teal-700 transition-colors`}
               >
-                <div className="bg-gray-100 w-full h-48 overflow-hidden relative">
+                {category.name}
+              </Link>
+            ))}
+          </div>
+
+          {/* Search Bar */}
+          <div className="mb-6 flex justify-center">
+            <div className="relative w-full sm:w-1/2">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={handleSearchChange}
+                placeholder="Search products..."
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-teal-500 focus:border-teal-500 text-gray-900 placeholder-gray-400"
+              />
+            </div>
+          </div>
+
+          {/* Products Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {currentProducts.map((product) => (
+              <div key={product.id} className="group relative bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-all duration-200 hover:scale-[1.02]">
+                <div className="aspect-w-1 aspect-h-1 w-full overflow-hidden rounded-t-lg bg-gray-100">
                   <img
-                    src={product.image || '/placeholder-product.jpg'}
+                    src={product.image}
                     alt={product.name}
-                    className="object-cover object-center w-full h-full group-hover:opacity-90 transition duration-300"
+                    className="w-full h-full object-cover object-center group-hover:opacity-90 transition-opacity"
                   />
                 </div>
-
-                <div className="p-4 flex flex-col flex-grow">
-                  <div className="flex flex-col flex-grow">
-                    <h3 className="text-base font-semibold text-gray-800 truncate">
-                      {product.name}
-                    </h3>
-                    <p className="mt-1 text-sm text-gray-500">
-                      {product.SubCategory?.Category?.name || 'Uncategorized'}
-                    </p>
-                  </div>
-                  <div className="mt-2 flex justify-between items-center">
-                    <p className="text-lg font-bold text-indigo-600">
-                      ${Number(product.price).toFixed(2)}
-                    </p>
-                    <button
-                      onClick={(e) => handleAddToCart(product.id, e)}
-                      className="bg-indigo-600 text-white px-3 py-1 rounded-md text-sm hover:bg-indigo-700 transition-colors"
-                    >
-                      Add to Cart
-                    </button>
-                  </div>
+                <div className="p-4">
+                  <h3 className="text-lg font-medium text-gray-900">{product.name}</h3>
+                  <p className="mt-1 text-sm text-gray-500">{product.description}</p>
+                  <p className="mt-2 text-lg font-semibold text-teal-600">${product.price}</p>
+                  <button 
+                    onClick={(e) => handleAddToCart(product.id, e)}
+                    className="mt-4 w-full bg-teal-600 text-white py-2 px-4 rounded-lg hover:bg-teal-700 transition-colors"
+                  >
+                    Add to Cart
+                  </button>
                 </div>
-              </Link>
-            </motion.div>
-          ))}
+              </div>
+            ))}
+          </div>
+
+          {/* No Products Found */}
+          {filteredProducts.length === 0 && (
+            <div className="text-center py-12">
+              <h2 className="text-2xl font-bold text-gray-900">No products found</h2>
+              <p className="mt-2 text-gray-500">Try a different category or check back later.</p>
+            </div>
+          )}
+
+          {/* Pagination */}
+          {filteredProducts.length > itemsPerPage && (
+            <div className="flex justify-center items-center space-x-4 mt-8">
+              <button
+                onClick={() => paginate('prev')}
+                disabled={currentPage === 1}
+                className={`p-2 rounded-full ${
+                  currentPage === 1
+                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                    : 'bg-teal-600 text-white hover:bg-teal-700'
+                }`}
+              >
+                <ChevronLeft size={20} />
+              </button>
+
+              <span className="text-gray-700 font-medium">
+                Page {currentPage} of {Math.ceil(filteredProducts.length / itemsPerPage)}
+              </span>
+
+              <button
+                onClick={() => paginate('next')}
+                disabled={currentPage === Math.ceil(filteredProducts.length / itemsPerPage)}
+                className={`p-2 rounded-full ${
+                  currentPage === Math.ceil(filteredProducts.length / itemsPerPage)
+                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                    : 'bg-teal-600 text-white hover:bg-teal-700'
+                }`}
+              >
+                <ChevronRight size={20} />
+              </button>
+            </div>
+          )}
         </div>
-
-        {filteredProducts.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-gray-500">No products found in this category.</p>
-          </div>
-        )}
-
-        {/* Pagination */}
-        {filteredProducts.length > itemsPerPage && (
-          <div className="flex justify-center items-center space-x-4 mt-8">
-            <button
-              onClick={() => paginate('prev')}
-              disabled={currentPage === 1}
-              className={`p-2 rounded-full ${
-                currentPage === 1
-                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                  : 'bg-indigo-600 text-white hover:bg-indigo-700'
-              }`}
-            >
-              <ChevronLeft size={20} />
-            </button>
-
-            <span className="text-gray-700 font-medium">
-              Page {currentPage} of {Math.ceil(filteredProducts.length / itemsPerPage)}
-            </span>
-
-            <button
-              onClick={() => paginate('next')}
-              disabled={currentPage === Math.ceil(filteredProducts.length / itemsPerPage)}
-              className={`p-2 rounded-full ${
-                currentPage === Math.ceil(filteredProducts.length / itemsPerPage)
-                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                  : 'bg-indigo-600 text-white hover:bg-indigo-700'
-              }`}
-            >
-              <ChevronRight size={20} />
-            </button>
-          </div>
-        )}
       </div>
     </div>
   );

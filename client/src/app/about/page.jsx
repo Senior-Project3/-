@@ -1,6 +1,7 @@
 'use client';
 
 import { useAuth } from '../Contexts/AuthContext';
+import Footer from '../components/Footer';
 
 export default function AboutPage() {
   const { user, isAuthenticated } = useAuth();
@@ -98,13 +99,7 @@ export default function AboutPage() {
       </div>
 
       {/* Footer */}
-      <footer className="bg-white mt-12">
-        <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-          <p className="text-center text-base text-gray-400">
-            &copy; 2024 My Website. All rights reserved.
-          </p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }
