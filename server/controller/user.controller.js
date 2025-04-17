@@ -149,5 +149,23 @@ module.exports = {
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
+  },
+  banUser: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { reason } = req.body;
+  
+      const user = await User.findByPk(id);
+      if (!user) return res.status(404).json({ error: 'User not found' });
+  
+      user.isBanned = true;
+      user.banReason = reason;
+      await user.save();
+  
+      res.json({ message: `User ${user.email} has been banned`, reason });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
   }
+  
 }
