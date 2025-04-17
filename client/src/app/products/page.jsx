@@ -6,6 +6,7 @@ import { useAuth } from '../Contexts/AuthContext';
 import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import Cookies from 'js-cookie';
+import { jwtDecode } from "jwt-decode"
 
 export default function ProductsPage() {
   const [products, setProducts] = useState([]);
@@ -47,24 +48,70 @@ export default function ProductsPage() {
     fetchData();
   }, []);
 
+  // const handleAddToCart = async (productId, e) => {
+  //   e.preventDefault();
+  //   e.stopPropagation();
+    
+  //   if (!isAuthenticated) {
+  //     alert('Please login to add items to cart');
+  //     return;
+  //   }
+
+  //   try {
+  //     const token = Cookies.get('token');
+  //     if (!token) {
+  //       throw new Error('No authentication token found');
+        
+  //     }
+  //     const decoded= jwtdecode
+  //     console.log(token,"token")
+
+
+  //     const response = await fetch('http://localhost:4000/api/cart/add', {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //         'Authorization': `Bearer ${token}`
+  //       },
+  //       body: JSON.stringify({
+  //         productId,
+  //         quantity: 1
+  //       })
+  //     });
+
+  //     if (!response.ok) {
+  //       const errorData = await response.json();
+  //       throw new Error(errorData.error || 'Failed to add to cart');
+  //     }
+
+  //     const data = await response.json();
+  //     alert('Product added to cart successfully!');
+  //   } catch (error) {
+  //     console.error('Error adding to cart:', error);
+  //     alert(error.message || 'Failed to add product to cart');
+  //   }
+  // };
   const handleAddToCart = async (productId, e) => {
     e.preventDefault();
     e.stopPropagation();
-    
+  
     if (!isAuthenticated) {
       alert('Please login to add items to cart');
       return;
     }
-
+  
     try {
       const token = Cookies.get('token');
       if (!token) {
         throw new Error('No authentication token found');
-        
       }
-      console.log(token,"token")
-
-
+  
+      const decoded = jwtDecode(token);
+      console.log("Decoded JWT:", decoded);
+  
+      const userId = decoded.id; // adjust if your token uses another key
+      console.log("User ID:", userId);
+  
       const response = await fetch('http://localhost:4000/api/cart/add', {
         method: 'POST',
         headers: {
@@ -73,15 +120,16 @@ export default function ProductsPage() {
         },
         body: JSON.stringify({
           productId,
-          quantity: 1
+          quantity: 1,
+          userId // include userId if your backend requires it
         })
       });
-
+  
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Failed to add to cart');
       }
-
+  
       const data = await response.json();
       alert('Product added to cart successfully!');
     } catch (error) {
@@ -89,6 +137,7 @@ export default function ProductsPage() {
       alert(error.message || 'Failed to add product to cart');
     }
   };
+  
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);

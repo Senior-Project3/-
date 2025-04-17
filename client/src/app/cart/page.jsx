@@ -11,6 +11,7 @@ export default function CartPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [token, setToken] = useState(Cookies.get('token'));
+  const [refresh,setrefresh]=useState(true)
 
   useEffect(() => {
     // If no token, don't try to fetch the cart
@@ -42,13 +43,13 @@ export default function CartPage() {
     };
 
     fetchCart();
-  }, [isAuthenticated, user, token]);
+  }, [isAuthenticated, user, token,refresh]);
 
   const handleUpdateQuantity = async (productId, newQuantity) => {
     try {
       const response = await axios.put(
-        'http://localhost:4000/api/cart/update',
-        { productId, quantity: newQuantity },
+        `http://localhost:4000/api/cart/update/${productId}`,
+        {  quantity: newQuantity },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -62,6 +63,7 @@ export default function CartPage() {
       }
 
       setCart(response.data);
+      setrefresh(!refresh)
     } catch (error) {
       console.error('Error updating cart:', error);
       alert(error.response?.data?.error || error.message || 'Failed to update cart');
@@ -85,6 +87,8 @@ export default function CartPage() {
       }
 
       setCart(response.data);
+      setrefresh(!refresh)
+
     } catch (error) {
       console.error('Error removing item:', error);
       alert(error.response?.data?.error || error.message || 'Failed to remove item from cart');
@@ -218,5 +222,4 @@ export default function CartPage() {
     </div>
   );
 }
-
 
