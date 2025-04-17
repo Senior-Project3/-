@@ -347,7 +347,7 @@ const DashboardPage = () => {
           </div>
         </div>
 
-        {/* Stats Cards */}
+      {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <StatsCard
             icon={<Package size={24} />}
@@ -561,7 +561,7 @@ const DashboardPage = () => {
                 Last 7 months
               </span>
             </div>
-          </div>
+      </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Daily Chart */}
@@ -576,12 +576,12 @@ const DashboardPage = () => {
                       data={newUsersData.daily}
                       margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
                     >
-                      <defs>
+              <defs>
                         <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8} />
                           <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
-                        </linearGradient>
-                      </defs>
+                </linearGradient>
+              </defs>
                       <CartesianGrid
                         strokeDasharray="3 3"
                         vertical={false}
@@ -614,8 +614,8 @@ const DashboardPage = () => {
                         fillOpacity={1}
                         fill="url(#colorUsers)"
                       />
-                    </AreaChart>
-                  </ResponsiveContainer>
+            </AreaChart>
+          </ResponsiveContainer>
                 ) : (
                   <div className="text-center text-gray-500 dark:text-gray-400 h-full flex items-center justify-center">
                     <Users className="h-12 w-12 mx-auto mb-3 opacity-30" />

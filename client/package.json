@@ -21,6 +21,7 @@
     "next": "15.3.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "sweetalert2": "^11.19.1",
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {

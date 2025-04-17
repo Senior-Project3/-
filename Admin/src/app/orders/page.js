@@ -32,12 +32,8 @@ export default function OrdersPage() {
     setError(null)
     try {
       const response = await axios.get("http://localhost:4000/api/orders/")
-
       const ordersData = Array.isArray(response.data) ? response.data : []
-
       setOrders(ordersData)
-      const calculatedTotalPages = Math.ceil(ordersData.length / ordersPerPage)
-      setTotalPages(calculatedTotalPages)
     } catch (error) {
       console.error("Error fetching orders:", error)
       setError("Failed to fetch orders. Please check if the server is running.")
@@ -45,8 +41,9 @@ export default function OrdersPage() {
     } finally {
       setIsLoading(false)
     }
-  }, [ordersPerPage])
+  }, [])
 
+  // Filter orders based on search query and status
   const filteredOrders = orders.filter((order) => {
     const matchesSearch =
       order.customerName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -57,16 +54,28 @@ export default function OrdersPage() {
     return matchesSearch && matchesStatus
   })
 
-  const paginatedOrders = filteredOrders.slice((currentPage - 1) * ordersPerPage, currentPage * ordersPerPage)
+  // Update pagination whenever filteredOrders changes
+  useEffect(() => {
+    const calculatedTotalPages = Math.ceil(filteredOrders.length / ordersPerPage)
+    setTotalPages(calculatedTotalPages)
 
-  const calculatedTotalPages = Math.ceil(filteredOrders.length / ordersPerPage)
+    // Reset currentPage if it exceeds the new totalPages after filtering
+    if (currentPage > calculatedTotalPages && calculatedTotalPages > 0) {
+      setCurrentPage(calculatedTotalPages)
+    } else if (filteredOrders.length === 0) {
+      setCurrentPage(1)
+    }
+  }, [filteredOrders, currentPage, ordersPerPage])
+
+  // Paginate the filtered orders
+  const paginatedOrders = filteredOrders.slice((currentPage - 1) * ordersPerPage, currentPage * ordersPerPage)
 
   const getPageNumbers = useCallback(() => {
     const pageNumbers = []
     const maxVisiblePages = 5
 
-    if (calculatedTotalPages <= maxVisiblePages) {
-      for (let i = 1; i <= calculatedTotalPages; i++) {
+    if (totalPages <= maxVisiblePages) {
+      for (let i = 1; i <= totalPages; i++) {
         pageNumbers.push(i)
       }
     } else {
@@ -75,11 +84,11 @@ export default function OrdersPage() {
           pageNumbers.push(i)
         }
         pageNumbers.push("...")
-        pageNumbers.push(calculatedTotalPages)
-      } else if (currentPage >= calculatedTotalPages - 2) {
+        pageNumbers.push(totalPages)
+      } else if (currentPage >= totalPages - 2) {
         pageNumbers.push(1)
         pageNumbers.push("...")
-        for (let i = calculatedTotalPages - 3; i <= calculatedTotalPages; i++) {
+        for (let i = totalPages - 3; i <= totalPages; i++) {
           pageNumbers.push(i)
         }
       } else {
@@ -89,12 +98,12 @@ export default function OrdersPage() {
           pageNumbers.push(i)
         }
         pageNumbers.push("...")
-        pageNumbers.push(calculatedTotalPages)
+        pageNumbers.push(totalPages)
       }
     }
 
     return pageNumbers
-  }, [currentPage, calculatedTotalPages])
+  }, [currentPage, totalPages])
 
   const updateOrderStatus = async (orderId, newStatus) => {
     try {
@@ -199,7 +208,7 @@ export default function OrdersPage() {
   }, [fetchOrders])
 
   const handlePageChange = (page) => {
-    if (page >= 1 && page <= calculatedTotalPages) {
+    if (page >= 1 && page <= totalPages) {
       setCurrentPage(page)
     }
   }
@@ -412,7 +421,7 @@ export default function OrdersPage() {
           )}
         </div>
 
-        {!isLoading && filteredOrders.length > 0 && (
+        {!isLoading && filteredOrders.length > 0 && totalPages > 1 && (
           <div className="flex justify-between items-center bg-white rounded-xl shadow-md p-4">
             <div className="text-sm text-gray-600">
               Showing {filteredOrders.length > 0 ? (currentPage - 1) * ordersPerPage + 1 : 0} to{" "}
@@ -430,7 +439,7 @@ export default function OrdersPage() {
 
               {getPageNumbers().map((pageNumber, index) =>
                 pageNumber === "..." ? (
-                  <span key={`ellipsis-${index}`} className="px-2">
+                  <span key={`ellipsis-${index}`} className="px-2 text-gray-600">
                     ...
                   </span>
                 ) : (
@@ -450,7 +459,7 @@ export default function OrdersPage() {
 
               <button
                 onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage === calculatedTotalPages}
+                disabled={currentPage === totalPages}
                 className="p-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
                 aria-label="Next page"
               >
