@@ -40,6 +40,11 @@ const User = (sequelize) => {
       type: DataTypes.STRING,
       allowNull: true,
     },
+    profileImage: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      defaultValue: '/default-profile.jpg',
+    },
   }, {
     timestamps: true,
   });
@@ -47,4 +52,4 @@ const User = (sequelize) => {
   return UserModel;
 };
 
-module.exports = User; 
+module.exports = User;

@@ -2,12 +2,13 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { 
-  LayoutDashboard, 
-  Users, 
-  Package, 
-  PlusCircle, 
-  ClipboardList
+import {
+  LayoutDashboard,
+  Users,
+  Package,
+  PlusCircle,
+  ClipboardList,
+  User,
 } from 'lucide-react';
 
 const Sidebar = ({ collapsed }) => {
@@ -15,14 +16,24 @@ const Sidebar = ({ collapsed }) => {
   const isActive = (path) => pathname === path;
 
   return (
-    <div className={`h-screen bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col transition-all duration-300 ${
-      collapsed ? 'w-20' : 'w-64'
-    }`}>
+    <div
+      className={`h-screen bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col transition-all duration-300 ${
+        collapsed ? 'w-20' : 'w-64'
+      }`}
+    >
       {/* Logo */}
       <div className="p-4 border-b border-gray-200 dark:border-gray-700">
         <Link href="/" className="flex items-center">
-          {!collapsed && <span className="text-xl font-bold text-gray-800 dark:text-white">Clothes</span>}
-          {collapsed && <span className="text-xl font-bold text-gray-800 dark:text-white">C</span>}
+          {!collapsed && (
+            <span className="text-xl font-bold text-gray-800 dark:text-white">
+              Clothes
+            </span>
+          )}
+          {collapsed && (
+            <span className="text-xl font-bold text-gray-800 dark:text-white">
+              C
+            </span>
+          )}
         </Link>
       </div>
 
@@ -105,13 +116,14 @@ const Sidebar = ({ collapsed }) => {
             <ClipboardList className="h-5 w-5 mr-3" />
             {!collapsed && 'Inventory'}
           </Link>
-          <div className="mt-8 space-y-1">
+        </div>
+
+        <div className="mt-8 space-y-1">
           {!collapsed && (
             <p className="px-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
-              Customers
+              Orders
             </p>
           )}
-
           <Link
             href="/orders"
             className={`flex items-center px-3 py-2 text-sm font-medium rounded-lg ${
@@ -120,10 +132,28 @@ const Sidebar = ({ collapsed }) => {
                 : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
             }`}
           >
-            <orders className="h-5 w-5 mr-3" />
-            {!collapsed && 'orders'}
+            <Package className="h-5 w-5 mr-3" />
+            {!collapsed && 'Orders'}
           </Link>
         </div>
+
+        <div className="mt-8 space-y-1">
+          {!collapsed && (
+            <p className="px-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+              Account
+            </p>
+          )}
+          <Link
+            href="/profile"
+            className={`flex items-center px-3 py-2 text-sm font-medium rounded-lg ${
+              isActive('/profile')
+                ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400'
+                : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
+            }`}
+          >
+            <User className="h-5 w-5 mr-3" />
+            {!collapsed && 'Profile'}
+          </Link>
         </div>
       </nav>
     </div>
