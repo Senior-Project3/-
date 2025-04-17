@@ -40,11 +40,7 @@ const User = (sequelize) => {
       type: DataTypes.STRING,
       allowNull: true,
     },
-    profileImage: {
-      type: DataTypes.STRING,
-      allowNull: true,
-      defaultValue: '/default-profile.jpg',
-    },
+  
   }, {
     timestamps: true,
   });

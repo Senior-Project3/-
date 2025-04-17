@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { jwtDecode } from "jwt-decode"
 import Link from "next/link"
 import { useAuth } from "../Contexts/AuthContext"
 import { motion } from "framer-motion"
@@ -104,6 +105,12 @@ export default function ProductsPage() {
         throw new Error("No authentication token found")
       }
 
+      const decoded = jwtDecode(token)
+      console.log("Decoded JWT:", decoded)
+
+      const userId = decoded.id // adjust if your token uses another key
+      console.log("User ID:", userId)
+
       const response = await fetch("http://localhost:4000/api/cart/add", {
         method: "POST",
         headers: {
@@ -113,6 +120,7 @@ export default function ProductsPage() {
         body: JSON.stringify({
           productId,
           quantity: 1,
+          userId // include userId if your backend requires it
         }),
       })
 
@@ -377,7 +385,7 @@ export default function ProductsPage() {
 
                   <div className="mt-auto pt-4 flex justify-between items-center">
                     <p className="text-lg font-semibold" style={{ color: colors.darkPink }}>
-                      ${Number(product.price).toFixed(2)}
+                      {Number(product.price).toFixed(2)}TD
                     </p>
 
                     <button
@@ -476,36 +484,6 @@ export default function ProductsPage() {
             </button>
           </div>
         )}
-      </div>
-
-      {/* Newsletter Section */}
-      <div className="py-16" style={{ backgroundColor: colors.softBeige }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-2xl md:text-3xl font-light mb-4" style={{ color: colors.textPrimary }}>
-            Join Our Community
-          </h2>
-          <p className="mb-8 max-w-2xl mx-auto" style={{ color: colors.textSecondary }}>
-            Subscribe to receive updates on new arrivals, special offers and other discount information.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-            <input
-              type="email"
-              placeholder="Your email address"
-              className="px-4 py-3 flex-grow rounded-md border focus:outline-none focus:ring-2 transition-all"
-              style={{
-                borderColor: colors.white,
-                backgroundColor: colors.white,
-                color: colors.textPrimary,
-              }}
-            />
-            <button
-              className="px-6 py-3 rounded-md font-medium"
-              style={{ backgroundColor: colors.pastelPink, color: colors.textPrimary }}
-            >
-              Subscribe
-            </button>
-          </div>
-        </div>
       </div>
     </div>
   )

@@ -8,6 +8,7 @@ import { useTheme } from '@/hooks/use-theme';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import PropTypes from 'prop-types';
+import Cookies from 'js-cookie';
 
 export const Header = ({ collapsed, setCollapsed }) => {
   const { theme, setTheme } = useTheme();
@@ -16,13 +17,22 @@ export const Header = ({ collapsed, setCollapsed }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const fetchNotifications = async () => {
+  const fetchNotifications = async (retryCount = 3, delay = 1000) => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:4000/api/orders/');
+      setError(null);
+      const token = Cookies.get('token'); // Get token for authentication
+      const response = await axios.get('http://localhost:4000/api/orders/', {
+        headers: {
+          Authorization: token ? `Bearer ${token}` : undefined,
+          'Content-Type': 'application/json',
+        },
+        timeout: 5000, // Set a 5-second timeout
+      });
+
       const orders = Array.isArray(response.data) ? response.data : [];
       // Filter for pending orders or orders within the last 24 hours
-      const newOrders = orders.filter(order => {
+      const newOrders = orders.filter((order) => {
         const isPending = order.status?.toLowerCase() === 'pending';
         const createdAt = new Date(order.orderDate);
         const now = new Date();
@@ -31,8 +41,30 @@ export const Header = ({ collapsed, setCollapsed }) => {
       });
       setNotifications(newOrders);
     } catch (err) {
-      console.error('Error fetching orders:', err);
-      setError('Failed to fetch order notifications');
+      console.error('Error fetching orders:', {
+        message: err.message,
+        code: err.code,
+        response: err.response?.data,
+        status: err.response?.status,
+      });
+
+      if (retryCount > 0 && err.code === 'ERR_NETWORK') {
+        console.log(`Retrying... (${retryCount} attempts left)`);
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        return fetchNotifications(retryCount - 1, delay * 2); // Exponential backoff
+      }
+
+      let errorMessage = 'Failed to fetch order notifications';
+      if (err.code === 'ERR_NETWORK') {
+        errorMessage = 'Unable to connect to the server. Please check if the server is running.';
+      } else if (err.response?.status === 401) {
+        errorMessage = 'Unauthorized. Please log in again.';
+      } else if (err.response?.status === 403) {
+        errorMessage = 'Access denied. You do not have permission to view orders.';
+      } else if (err.response?.data?.error) {
+        errorMessage = err.response.data.error;
+      }
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -40,12 +72,12 @@ export const Header = ({ collapsed, setCollapsed }) => {
 
   useEffect(() => {
     fetchNotifications();
-    const interval = setInterval(fetchNotifications, 30000); // Poll every 30 seconds
+    const interval = setInterval(() => fetchNotifications(), 30000); // Poll every 30 seconds
     return () => clearInterval(interval);
   }, []);
 
   const handleMarkAsRead = (orderId) => {
-    setNotifications(notifications.filter(order => order.id !== orderId));
+    setNotifications(notifications.filter((order) => order.id !== orderId));
   };
 
   // Reuse status badge styling from OrdersPage.jsx
@@ -106,7 +138,7 @@ export const Header = ({ collapsed, setCollapsed }) => {
                   <p className="text-gray-600 text-sm">No new orders</p>
                 )}
                 <ul className="space-y-2 max-h-60 overflow-y-auto">
-                  {notifications.map(order => (
+                  {notifications.map((order) => (
                     <li
                       key={order.id}
                       className="flex justify-between items-center border-b border-gray-100 pb-2"

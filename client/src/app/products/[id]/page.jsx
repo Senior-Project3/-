@@ -1,6 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { jwtDecode } from "jwt-decode"
+import Cookies from "js-cookie"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import { useAuth } from "../../Contexts/AuthContext"
@@ -93,24 +95,96 @@ export default function ProductDetailsPage() {
   }
 
   // Handle add to cart
-  const handleAddToCart = () => {
+  const handleAddToCart = async (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+
     if (!isAuthenticated) {
-      Swal.fire({
-        icon: "warning",
+      await Swal.fire({
         title: "Login Required",
-        text: "Please login to add items to cart",
-        confirmButtonColor: colors.darkPink,
+        text: "Please login to add items to your cart.",
+        icon: "warning",
+        confirmButtonColor: colors.pastelPink,
+        customClass: {
+          popup: "rounded-lg",
+          confirmButton: "rounded-md",
+        },
       })
       return
     }
 
-    // Add to cart logic would go here
-    Swal.fire({
-      icon: "success",
-      title: "Added to Cart",
-      text: `Added ${quantity} item(s) to cart`,
-      confirmButtonColor: colors.darkPink,
-    })
+    try {
+      const result = await Swal.fire({
+        title: "Add to Cart",
+        text: `Are you sure you want to add "${product.name}" to your cart?`,
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonColor: colors.pastelPink,
+        cancelButtonColor: colors.lightGray,
+        confirmButtonText: "Yes, add it!",
+        cancelButtonText: "Cancel",
+        customClass: {
+          popup: "rounded-lg",
+          confirmButton: "rounded-md",
+          cancelButton: "rounded-md",
+        },
+      })
+
+      if (!result.isConfirmed) return
+
+      const token = Cookies.get("token")
+      if (!token) {
+        throw new Error("No authentication token found")
+      }
+
+      const decoded = jwtDecode(token)
+      console.log("Decoded JWT:", decoded)
+
+      const userId = decoded.id // adjust if your token uses another key
+      console.log("User ID:", userId)
+
+      const response = await fetch("http://localhost:4000/api/cart/add", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          productId: id,
+          quantity,
+          userId, // include userId if your backend requires it
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || "Failed to add to cart")
+      }
+
+      await response.json()
+      await Swal.fire({
+        title: "Success!",
+        text: `"${product.name}" has been added to your cart.`,
+        icon: "success",
+        confirmButtonColor: colors.pastelPink,
+        customClass: {
+          popup: "rounded-lg",
+          confirmButton: "rounded-md",
+        },
+      })
+    } catch (error) {
+      console.error("Error adding to cart:", error)
+      await Swal.fire({
+        title: "Error!",
+        text: error.message || "Failed to add product to cart",
+        icon: "error",
+        confirmButtonColor: colors.pastelPink,
+        customClass: {
+          popup: "rounded-lg",
+          confirmButton: "rounded-md",
+        },
+      })
+    }
   }
 
   // Handle add to wishlist
@@ -256,7 +330,7 @@ export default function ProductDetailsPage() {
             {/* Price */}
             <div className="mt-4 mb-6">
               <p className="text-3xl" style={{ color: colors.textPrimary }}>
-                ${Number(product.price).toFixed(2)}
+                {Number(product.price).toFixed(2)}TD
               </p>
               <p className="text-sm mt-1" style={{ color: colors.textSecondary }}>
                 Including all taxes
@@ -383,35 +457,7 @@ export default function ProductDetailsPage() {
           </div>
         </div>
 
-        {/* Product Details Accordion - Mobile */}
-        <div className="mt-12 md:hidden">
-          <div className="border-t" style={{ borderColor: colors.lightGray }}>
-            <button
-              onClick={() => toggleSection("description")}
-              className="flex items-center justify-between w-full py-4 font-medium"
-              style={{ color: colors.textPrimary }}
-            >
-              <span>Description</span>
-              {expandedSection === "description" ? (
-                <ChevronUp size={18} style={{ color: colors.textSecondary }} />
-              ) : (
-                <ChevronDown size={18} style={{ color: colors.textSecondary }} />
-              )}
-            </button>
-            {expandedSection === "description" && (
-              <div className="pb-6" style={{ color: colors.textSecondary }}>
-                <p>
-                  {product.description ||
-                    `This premium product exemplifies our commitment to quality and design excellence. 
-                    Crafted with meticulous attention to detail, it combines functionality with aesthetic appeal.
-                    
-                    The elegant design makes it a versatile addition to any collection, suitable for both everyday use and special occasions. 
-                    Made from high-quality materials, it promises durability and long-lasting performance.`}
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
+  
 
         {/* Related Products */}
         <div className="mt-20 border-t pt-12" style={{ borderColor: colors.lightGray }}>
@@ -437,7 +483,7 @@ export default function ProductDetailsPage() {
                       {relatedProduct.name}
                     </h3>
                     <p className="mt-1 font-medium" style={{ color: colors.darkPink }}>
-                      ${Number(relatedProduct.price).toFixed(2)}
+                      {Number(relatedProduct.price).toFixed(2)}TD
                     </p>
                   </Link>
                 ))

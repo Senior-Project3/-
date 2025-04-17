@@ -137,24 +137,6 @@ const Sidebar = ({ collapsed }) => {
           </Link>
         </div>
 
-        <div className="mt-8 space-y-1">
-          {!collapsed && (
-            <p className="px-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
-              Account
-            </p>
-          )}
-          <Link
-            href="/profile"
-            className={`flex items-center px-3 py-2 text-sm font-medium rounded-lg ${
-              isActive('/profile')
-                ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400'
-                : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
-            }`}
-          >
-            <User className="h-5 w-5 mr-3" />
-            {!collapsed && 'Profile'}
-          </Link>
-        </div>
       </nav>
     </div>
   );

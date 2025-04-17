@@ -2,22 +2,22 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { ShoppingBag, User, Menu, X } from 'lucide-react';
 import { useAuth } from './Contexts/AuthContext';
-import { ShoppingBag, Search, User, Menu, X, ChevronDown } from 'lucide-react';
 
 // Sample categories data - in a real app, this would come from your API
 const categories = [
   {
     id: 1,
     name: "Men's Collection",
-    image: "/images/SoonNoon.jpg ",
-    link: "/products?category=men"
+    image: "/images/SoonNoon.jpg",
+    link: "/products?category=mens"
   },
   {
     id: 2,
     name: "Women's Collection",
     image: "/images/download.jpg",
-    link: "/products?category=women"
+    link: "/products?category=womens"
   },
   {
     id: 3,
@@ -27,8 +27,8 @@ const categories = [
   }
 ];
 
-export default function HomePage() {
-  const { user, isAuthenticated } = useAuth();
+export default function LandingPage() {
+  const { isAuthenticated } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [shuffledCategories, setShuffledCategories] = useState([]);
@@ -49,19 +49,19 @@ export default function HomePage() {
 
   const heroSlides = [
     {
-      image: "/images/hero-1.jpg",
+      image: "/images/lwv.jpg",
       title: "Redefine Your Style",
       subtitle: "Discover the latest trends in fashion",
       cta: "Shop Now"
     },
     {
-      image: "/images/hero-2.jpg",
+      image: "/images/prada.avif",
       title: "New Arrivals: Spring '25 Collection",
       subtitle: "Fresh styles for the new season",
       cta: "View Collection"
     },
     {
-      image: "/images/hero-3.jpg",
+      image: "/images/gucci.avif",
       title: "Limited Time Offers",
       subtitle: "Up to 50% off on selected items",
       cta: "Explore Deals"
@@ -69,7 +69,7 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       {/* Navigation Bar */}
       <nav className="bg-white/90 backdrop-blur-md fixed w-full z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -77,54 +77,42 @@ export default function HomePage() {
             {/* Logo and Brand */}
             <div className="flex items-center">
               <Link href="/" className="flex items-center">
-                <ShoppingBag className="h-8 w-8 text-rose-500" />
-                <span className="ml-2 text-xl font-bold bg-gradient-to-r from-rose-500 to-pink-600 bg-clip-text text-transparent">
-                  StyleHub
+                <ShoppingBag className="h-8 w-8 text-teal-500" />
+                <span className="ml-2 text-xl font-bold bg-gradient-to-r from-teal-600 to-emerald-600 bg-clip-text text-transparent">
+                  Labbasni
                 </span>
               </Link>
             </div>
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-8">
-              <Link href="/products" className="text-gray-700 hover:text-rose-500 transition-colors">
+              <Link href="/products" className="text-gray-700 hover:text-teal-600 transition-colors">
                 Products
               </Link>
-              <Link href="/features" className="text-gray-700 hover:text-rose-500 transition-colors">
-                Features
-              </Link>
-              <Link href="/about" className="text-gray-700 hover:text-rose-500 transition-colors">
+              <Link href="/about" className="text-gray-700 hover:text-teal-600 transition-colors">
                 About Us
               </Link>
             </div>
 
-            {/* Search and User Actions */}
+            {/* User Actions */}
             <div className="flex items-center space-x-4">
-              <div className="relative hidden md:block">
-                <input
-                  type="text"
-                  placeholder="Search products..."
-                  className="w-64 px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent"
-                />
-                <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-              </div>
-
-              <Link href="/cart" className="text-gray-700 hover:text-rose-500 transition-colors">
+              <Link href="/cart" className="text-gray-700 hover:text-teal-600 transition-colors">
                 <ShoppingBag className="h-6 w-6" />
               </Link>
 
               {isAuthenticated ? (
-                <Link href="/profile" className="text-gray-700 hover:text-rose-500 transition-colors">
+                <Link href="/profile" className="text-gray-700 hover:text-teal-600 transition-colors">
                   <User className="h-6 w-6" />
                 </Link>
               ) : (
-                <Link href="/login" className="text-gray-700 hover:text-rose-500 transition-colors">
+                <Link href="/login" className="text-gray-700 hover:text-teal-600 transition-colors">
                   <User className="h-6 w-6" />
                 </Link>
               )}
 
               {/* Mobile menu button */}
               <button
-                className="md:hidden text-gray-700 hover:text-rose-500 transition-colors"
+                className="md:hidden text-gray-700 hover:text-teal-600 transition-colors"
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
               >
                 {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -137,23 +125,12 @@ export default function HomePage() {
         {isMenuOpen && (
           <div className="md:hidden bg-white border-t border-gray-200">
             <div className="px-4 py-2 space-y-2">
-              <Link href="/products" className="block text-gray-700 hover:text-rose-500 transition-colors">
+              <Link href="/products" className="block text-gray-700 hover:text-teal-600 transition-colors">
                 Products
               </Link>
-              <Link href="/features" className="block text-gray-700 hover:text-rose-500 transition-colors">
-                Features
-              </Link>
-              <Link href="/about" className="block text-gray-700 hover:text-rose-500 transition-colors">
+              <Link href="/about" className="block text-gray-700 hover:text-teal-600 transition-colors">
                 About Us
               </Link>
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Search products..."
-                  className="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent"
-                />
-                <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-              </div>
             </div>
           </div>
         )}
@@ -180,7 +157,7 @@ export default function HomePage() {
                 <p className="text-xl md:text-2xl mb-8">{slide.subtitle}</p>
                 <Link
                   href="/products"
-                  className="inline-block px-8 py-3 bg-rose-500 text-white rounded-full hover:bg-rose-600 transition-colors"
+                  className="inline-block px-8 py-3 bg-teal-600 text-white rounded-full hover:bg-teal-700 transition-colors"
                 >
                   {slide.cta}
                 </Link>
@@ -192,7 +169,7 @@ export default function HomePage() {
 
       {/* Featured Categories */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <h2 className="text-3xl font-bold text-center mb-12">Shop by Category</h2>
+        <h2 className="text-3xl font-bold text-center mb-12"></h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {shuffledCategories.map((category) => (
             <Link
@@ -215,4 +192,4 @@ export default function HomePage() {
       </div>
     </div>
   );
-} 
+}
