@@ -3,6 +3,9 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '../Contexts/AuthContext';
+import { motion } from 'framer-motion';
+import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
+import Cookies from 'js-cookie';
 
 export default function ProductsPage() {
   const [products, setProducts] = useState([]);
@@ -11,6 +14,11 @@ export default function ProductsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { isAuthenticated } = useAuth();
+  const [hoveredProduct, setHoveredProduct] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const itemsPerPage = 8;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -27,9 +35,6 @@ export default function ProductsPage() {
         const productsData = await productsRes.json();
         const categoriesData = await categoriesRes.json();
 
-        console.log('Products:', productsData);
-        console.log('Categories:', categoriesData);
-
         setProducts(productsData);
         setCategories(categoriesData);
       } catch (error) {
@@ -42,19 +47,78 @@ export default function ProductsPage() {
     fetchData();
   }, []);
 
-  const filteredProducts = selectedCategory
-    ? products.filter(product => {
-        // Check if the product's category name matches the selected category name
-        const categoryMatch = product.category?.name?.toLowerCase() === selectedCategory.toLowerCase();
-        console.log('Product:', product.name, 'Category:', product.category?.name, 'Selected:', selectedCategory, 'Match:', categoryMatch);
-        return categoryMatch;
-      })
-    : products;
+  const handleAddToCart = async (productId, e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!isAuthenticated) {
+      alert('Please login to add items to cart');
+      return;
+    }
+
+    try {
+      const token = Cookies.get('token');
+      if (!token) {
+        throw new Error('No authentication token found');
+        
+      }
+      console.log(token,"token")
+
+
+      const response = await fetch('http://localhost:4000/api/cart/add', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          productId,
+          quantity: 1
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to add to cart');
+      }
+
+      const data = await response.json();
+      alert('Product added to cart successfully!');
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      alert(error.message || 'Failed to add product to cart');
+    }
+  };
+
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+    setCurrentPage(1);
+  };
+
+  const filteredProducts = products.filter(product => {
+    const categoryMatch = selectedCategory
+      ? product.SubCategory?.Category?.id === selectedCategory
+      : true;
+    const searchMatch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
+    return categoryMatch && searchMatch;
+  });
+
+  const indexOfLastProduct = currentPage * itemsPerPage;
+  const indexOfFirstProduct = indexOfLastProduct - itemsPerPage;
+  const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
+
+  const paginate = (direction) => {
+    if (direction === 'next' && currentPage < Math.ceil(filteredProducts.length / itemsPerPage)) {
+      setCurrentPage(prev => prev + 1);
+    } else if (direction === 'prev' && currentPage > 1) {
+      setCurrentPage(prev => prev - 1);
+    }
+  };
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white pt-16 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+        <div className="text-center text-gray-600">Loading...</div>
       </div>
     );
   }
@@ -73,68 +137,92 @@ export default function ProductsPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white pt-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Our Products</h1>
-          {isAuthenticated && (
-            <Link
-              href="/products/new"
-              className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition-colors"
-            >
-              Add New Product
-            </Link>
-          )}
-        </div>
+        <h1 className="text-3xl font-bold text-gray-900 mb-8">Our Products</h1>
 
-        <div className="mb-8">
-          <label htmlFor="category" className="block text-sm font-medium text-gray-700">
-            Filter by Category
-          </label>
-          <select
-            id="category"
-            value={selectedCategory}
-            onChange={(e) => {
-              console.log('Selected Category:', e.target.value);
-              setSelectedCategory(e.target.value);
-            }}
-            className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+        {/* Category Filters */}
+        <div className="mb-6 flex flex-wrap gap-2">
+          <button
+            onClick={() => setSelectedCategory('')}
+            className={`px-4 py-2 rounded-md text-sm font-medium ${
+              selectedCategory === '' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-900'
+            } hover:bg-indigo-700`}
           >
-            <option value="">All Categories</option>
-            {categories.map(category => (
-              <option key={category.name} value={category.name}>
-                {category.name}
-              </option>
-            ))}
-          </select>
+            All Products
+          </button>
+          {categories.map(category => (
+            <button
+              key={category.id}
+              onClick={() => setSelectedCategory(category.id)}
+              className={`px-4 py-2 rounded-md text-sm font-medium ${
+                selectedCategory === category.id ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-900'
+              } hover:bg-indigo-700`}
+            >
+              {category.name}
+            </button>
+          ))}
         </div>
 
-        <div className="grid grid-cols-1 gap-y-10 gap-x-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {filteredProducts.map(product => (
-            <Link
+        {/* Search Bar */}
+        <div className="mb-6 flex justify-center">
+          <div className="relative w-full sm:w-1/2">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={handleSearchChange}
+              placeholder="Search products..."
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-black placeholder-gray-400"
+            />
+          </div>
+        </div>
+
+        {/* Product Grid */}
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {currentProducts.map((product, index) => (
+            <motion.div
               key={product.id}
-              href={`/products/${product.id}`}
-              className="group relative"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: index * 0.05, duration: 0.3 }}
+              className="h-full"
+              onMouseEnter={() => setHoveredProduct(product.id)}
+              onMouseLeave={() => setHoveredProduct(null)}
             >
-              <div className="w-full min-h-80 bg-gray-200 aspect-w-1 aspect-h-1 rounded-md overflow-hidden group-hover:opacity-75">
-                <img
-                  src={product.image || '/placeholder-product.jpg'}
-                  alt={product.name}
-                  className="w-full h-full object-center object-cover"
-                />
-              </div>
-              <div className="mt-4 flex justify-between">
-                <div>
-                  <h3 className="text-sm text-gray-700">
-                    {product.name}
-                  </h3>
-                  <p className="mt-1 text-sm text-gray-500">
-                    {product.category?.name || 'Uncategorized'}
-                  </p>
+              <Link
+                href={`/products/${product.id}`}
+                className="group flex flex-col bg-white rounded-lg shadow hover:shadow-lg transition duration-300 overflow-hidden min-h-[400px] h-full relative"
+              >
+                <div className="bg-gray-100 w-full h-48 overflow-hidden relative">
+                  <img
+                    src={product.image || '/placeholder-product.jpg'}
+                    alt={product.name}
+                    className="object-cover object-center w-full h-full group-hover:opacity-90 transition duration-300"
+                  />
                 </div>
-                <p className="text-sm font-medium text-gray-900">
-                  ${Number(product.price).toFixed(2)}
-                </p>
-              </div>
-            </Link>
+
+                <div className="p-4 flex flex-col flex-grow">
+                  <div className="flex flex-col flex-grow">
+                    <h3 className="text-base font-semibold text-gray-800 truncate">
+                      {product.name}
+                    </h3>
+                    <p className="mt-1 text-sm text-gray-500">
+                      {product.SubCategory?.Category?.name || 'Uncategorized'}
+                    </p>
+                  </div>
+                  <div className="mt-2 flex justify-between items-center">
+                    <p className="text-lg font-bold text-indigo-600">
+                      ${Number(product.price).toFixed(2)}
+                    </p>
+                    <button
+                      onClick={(e) => handleAddToCart(product.id, e)}
+                      className="bg-indigo-600 text-white px-3 py-1 rounded-md text-sm hover:bg-indigo-700 transition-colors"
+                    >
+                      Add to Cart
+                    </button>
+                  </div>
+                </div>
+              </Link>
+            </motion.div>
           ))}
         </div>
 
@@ -143,8 +231,40 @@ export default function ProductsPage() {
             <p className="text-gray-500">No products found in this category.</p>
           </div>
         )}
+
+        {/* Pagination */}
+        {filteredProducts.length > itemsPerPage && (
+          <div className="flex justify-center items-center space-x-4 mt-8">
+            <button
+              onClick={() => paginate('prev')}
+              disabled={currentPage === 1}
+              className={`p-2 rounded-full ${
+                currentPage === 1
+                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  : 'bg-indigo-600 text-white hover:bg-indigo-700'
+              }`}
+            >
+              <ChevronLeft size={20} />
+            </button>
+
+            <span className="text-gray-700 font-medium">
+              Page {currentPage} of {Math.ceil(filteredProducts.length / itemsPerPage)}
+            </span>
+
+            <button
+              onClick={() => paginate('next')}
+              disabled={currentPage === Math.ceil(filteredProducts.length / itemsPerPage)}
+              className={`p-2 rounded-full ${
+                currentPage === Math.ceil(filteredProducts.length / itemsPerPage)
+                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  : 'bg-indigo-600 text-white hover:bg-indigo-700'
+              }`}
+            >
+              <ChevronRight size={20} />
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
-} 
-
+}
