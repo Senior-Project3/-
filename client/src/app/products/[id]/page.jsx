@@ -182,9 +182,7 @@ export default function ProductDetailsPage() {
   }
 
   // Mock data for product images (in a real app, this would come from the API)
-  const productImages = [
-    product.image 
-  ]
+  const productImages = [product.image]
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: colors.white }}>
@@ -223,7 +221,9 @@ export default function ProductDetailsPage() {
                 <button
                   key={index}
                   onClick={() => setActiveImage(index)}
-                  className={`relative rounded-md overflow-hidden ${activeImage === index ? "ring-2" : ""}`}
+                  className={`relative rounded-md overflow-hidden transition-all duration-200 ${
+                    activeImage === index ? "ring-2 transform scale-105" : ""
+                  }`}
                   style={{
                     ringColor: colors.darkPink,
                     border: activeImage === index ? `1px solid ${colors.darkPink}` : `1px solid ${colors.lightGray}`,
@@ -234,6 +234,9 @@ export default function ProductDetailsPage() {
                     alt={`${product.name} - View ${index + 1}`}
                     className="h-16 w-full object-cover object-center"
                   />
+                  {activeImage === index && (
+                    <div className="absolute inset-0 bg-white opacity-20" aria-hidden="true"></div>
+                  )}
                 </button>
               ))}
             </div>
@@ -275,14 +278,29 @@ export default function ProductDetailsPage() {
                 <span className="font-medium" style={{ color: colors.textPrimary }}>
                   Quantity
                 </span>
-                <div className="flex items-center border rounded-md" style={{ borderColor: colors.softBeige }}>
-                  <button onClick={decreaseQuantity} className="px-3 py-1" style={{ color: colors.textSecondary }}>
-                    <Minus size={16} />
+                <div
+                  className="flex items-center border rounded-md overflow-hidden"
+                  style={{ borderColor: colors.softBeige }}
+                >
+                  <button
+                    onClick={decreaseQuantity}
+                    className="px-3 py-1 transition-colors hover:bg-gray-50"
+                    style={{ color: colors.textSecondary }}
+                    disabled={quantity <= 1}
+                  >
+                    <Minus size={16} className={quantity <= 1 ? "opacity-50" : ""} />
                   </button>
-                  <span className="px-4 py-1 text-center w-12" style={{ color: colors.textPrimary }}>
+                  <span
+                    className="px-4 py-1 text-center w-12 border-x"
+                    style={{ color: colors.textPrimary, borderColor: colors.softBeige }}
+                  >
                     {quantity}
                   </span>
-                  <button onClick={increaseQuantity} className="px-3 py-1" style={{ color: colors.textSecondary }}>
+                  <button
+                    onClick={increaseQuantity}
+                    className="px-3 py-1 transition-colors hover:bg-gray-50"
+                    style={{ color: colors.textSecondary }}
+                  >
                     <Plus size={16} />
                   </button>
                 </div>
@@ -292,15 +310,18 @@ export default function ProductDetailsPage() {
               <div className="flex flex-col sm:flex-row gap-4">
                 <button
                   onClick={handleAddToCart}
-                  className="flex-1 py-3 px-6 rounded-md flex items-center justify-center transition-colors"
-                  style={{ backgroundColor: colors.pastelPink, color: colors.textPrimary }}
+                  className="flex-1 py-3 px-6 rounded-md flex items-center justify-center transition-all duration-300 hover:shadow-md"
+                  style={{
+                    backgroundColor: colors.pastelPink,
+                    color: colors.textPrimary,
+                  }}
                 >
                   <ShoppingBag size={18} className="mr-2" />
                   Add to Cart
                 </button>
                 <button
                   onClick={handleAddToWishlist}
-                  className="py-3 px-6 rounded-md flex items-center justify-center border transition-colors"
+                  className="py-3 px-6 rounded-md flex items-center justify-center border transition-all duration-300 hover:bg-gray-50"
                   style={{
                     borderColor: colors.softBeige,
                     color: colors.textPrimary,
@@ -401,35 +422,38 @@ export default function ProductDetailsPage() {
             {relatedProducts.length > 0
               ? relatedProducts.map((relatedProduct) => (
                   <Link key={relatedProduct.id} href={`/products/${relatedProduct.id}`} className="group">
-                    <div className="aspect-w-1 aspect-h-1 w-full overflow-hidden rounded-lg mb-4 bg-gray-100">
+                    <div className="aspect-square w-full overflow-hidden rounded-lg mb-4 bg-gray-100 relative">
                       <img
                         src={relatedProduct.image || "/placeholder-product.jpg"}
                         alt={relatedProduct.name}
-                        className="h-full w-full object-cover object-center group-hover:opacity-75 transition-opacity"
+                        className="h-full w-full object-cover object-center group-hover:opacity-75 transition-opacity duration-300"
                       />
+                      <div
+                        className="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity duration-300"
+                        aria-hidden="true"
+                      ></div>
                     </div>
-                    <h3 className="text-base font-medium" style={{ color: colors.textPrimary }}>
+                    <h3 className="text-base font-medium truncate" style={{ color: colors.textPrimary }}>
                       {relatedProduct.name}
                     </h3>
-                    <p className="mt-1" style={{ color: colors.darkPink }}>
+                    <p className="mt-1 font-medium" style={{ color: colors.darkPink }}>
                       ${Number(relatedProduct.price).toFixed(2)}
                     </p>
                   </Link>
                 ))
-              : // Placeholder related products
-                Array.from({ length: 4 }).map((_, index) => (
+              : Array.from({ length: 4 }).map((_, index) => (
                   <div key={index} className="group">
-                    <div className="aspect-w-1 aspect-h-1 w-full overflow-hidden rounded-lg mb-4 bg-gray-100">
+                    <div className="aspect-square w-full overflow-hidden rounded-lg mb-4 bg-gray-100">
                       <img
                         src={`/placeholder.svg?height=300&width=300&text=Related+${index + 1}`}
                         alt={`Related product ${index + 1}`}
                         className="h-full w-full object-cover object-center"
                       />
                     </div>
-                    <h3 className="text-base font-medium" style={{ color: colors.textPrimary }}>
+                    <h3 className="text-base font-medium truncate" style={{ color: colors.textPrimary }}>
                       Related Product {index + 1}
                     </h3>
-                    <p className="mt-1" style={{ color: colors.darkPink }}>
+                    <p className="mt-1 font-medium" style={{ color: colors.darkPink }}>
                       ${(29.99 + index * 10).toFixed(2)}
                     </p>
                   </div>

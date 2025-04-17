@@ -4,8 +4,9 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useAuth } from "../Contexts/AuthContext"
 import { motion } from "framer-motion"
-import { ChevronLeft, ChevronRight, Search, ShoppingBag, Heart } from "lucide-react"
+import { ChevronLeft, ChevronRight, Search, ShoppingBag } from "lucide-react"
 import Cookies from "js-cookie"
+import Swal from "sweetalert2"
 
 export default function ProductsPage() {
   // Color palette
@@ -26,7 +27,6 @@ export default function ProductsPage() {
   const [selectedCategory, setSelectedCategory] = useState("")
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const [hoveredProduct, setHoveredProduct] = useState(null)
   const [currentPage, setCurrentPage] = useState(1)
   const [searchQuery, setSearchQuery] = useState("")
   const { isAuthenticated } = useAuth()
@@ -61,17 +61,44 @@ export default function ProductsPage() {
     fetchData()
   }, [])
 
-  // Add to cart functionality
-  const handleAddToCart = async (productId, e) => {
+  // Add to cart functionality with Swal confirmation
+  const handleAddToCart = async (productId, productName, e) => {
     e.preventDefault()
     e.stopPropagation()
 
     if (!isAuthenticated) {
-      alert("Please login to add items to cart")
+      await Swal.fire({
+        title: "Login Required",
+        text: "Please login to add items to your cart.",
+        icon: "warning",
+        confirmButtonColor: colors.pastelPink,
+        customClass: {
+          popup: "rounded-lg",
+          confirmButton: "rounded-md",
+        },
+      })
       return
     }
 
     try {
+      const result = await Swal.fire({
+        title: "Add to Cart",
+        text: `Are you sure you want to add "${productName}" to your cart?`,
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonColor: colors.pastelPink,
+        cancelButtonColor: colors.lightGray,
+        confirmButtonText: "Yes, add it!",
+        cancelButtonText: "Cancel",
+        customClass: {
+          popup: "rounded-lg",
+          confirmButton: "rounded-md",
+          cancelButton: "rounded-md",
+        },
+      })
+
+      if (!result.isConfirmed) return
+
       const token = Cookies.get("token")
       if (!token) {
         throw new Error("No authentication token found")
@@ -94,11 +121,29 @@ export default function ProductsPage() {
         throw new Error(errorData.error || "Failed to add to cart")
       }
 
-      const data = await response.json()
-      alert("Product added to cart successfully!")
+      await response.json()
+      await Swal.fire({
+        title: "Success!",
+        text: `"${productName}" has been added to your cart.`,
+        icon: "success",
+        confirmButtonColor: colors.pastelPink,
+        customClass: {
+          popup: "rounded-lg",
+          confirmButton: "rounded-md",
+        },
+      })
     } catch (error) {
       console.error("Error adding to cart:", error)
-      alert(error.message || "Failed to add product to cart")
+      await Swal.fire({
+        title: "Error!",
+        text: error.message || "Failed to add product to cart",
+        icon: "error",
+        confirmButtonColor: colors.pastelPink,
+        customClass: {
+          popup: "rounded-lg",
+          confirmButton: "rounded-md",
+        },
+      })
     }
   }
 
@@ -116,16 +161,53 @@ export default function ProductsPage() {
   })
 
   // Pagination logic
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage)
   const indexOfLastProduct = currentPage * itemsPerPage
   const indexOfFirstProduct = indexOfLastProduct - itemsPerPage
   const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct)
 
   const paginate = (direction) => {
-    if (direction === "next" && currentPage < Math.ceil(filteredProducts.length / itemsPerPage)) {
+    if (direction === "next" && currentPage < totalPages) {
       setCurrentPage((prev) => prev + 1)
     } else if (direction === "prev" && currentPage > 1) {
       setCurrentPage((prev) => prev - 1)
     }
+  }
+
+  // Generate page numbers with ellipsis for large page counts
+  const getPageNumbers = () => {
+    const pageNumbers = []
+    const maxVisiblePages = 5
+
+    if (totalPages <= maxVisiblePages) {
+      for (let i = 1; i <= totalPages; i++) {
+        pageNumbers.push(i)
+      }
+    } else {
+      if (currentPage <= 3) {
+        for (let i = 1; i <= 4; i++) {
+          pageNumbers.push(i)
+        }
+        pageNumbers.push("...")
+        pageNumbers.push(totalPages)
+      } else if (currentPage >= totalPages - 2) {
+        pageNumbers.push(1)
+        pageNumbers.push("...")
+        for (let i = totalPages - 3; i <= totalPages; i++) {
+          pageNumbers.push(i)
+        }
+      } else {
+        pageNumbers.push(1)
+        pageNumbers.push("...")
+        for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+          pageNumbers.push(i)
+        }
+        pageNumbers.push("...")
+        pageNumbers.push(totalPages)
+      }
+    }
+
+    return pageNumbers
   }
 
   // Loading state
@@ -205,7 +287,6 @@ export default function ProductsPage() {
                   borderColor: colors.softBeige,
                   backgroundColor: colors.white,
                   color: colors.textPrimary,
-                  focusRing: colors.pastelPink,
                 }}
               />
             </div>
@@ -214,7 +295,10 @@ export default function ProductsPage() {
           {/* Category Filters */}
           <div className="flex flex-wrap justify-center gap-2">
             <button
-              onClick={() => setSelectedCategory("")}
+              onClick={() => {
+                setSelectedCategory("")
+                setCurrentPage(1)
+              }}
               className="px-4 py-2 rounded-md text-sm font-medium transition-colors"
               style={{
                 backgroundColor: selectedCategory === "" ? colors.pastelPink : colors.white,
@@ -227,7 +311,10 @@ export default function ProductsPage() {
             {categories.map((category) => (
               <button
                 key={category.id}
-                onClick={() => setSelectedCategory(category.id)}
+                onClick={() => {
+                  setSelectedCategory(category.id)
+                  setCurrentPage(1)
+                }}
                 className="px-4 py-2 rounded-md text-sm font-medium transition-colors"
                 style={{
                   backgroundColor: selectedCategory === category.id ? colors.pastelPink : colors.white,
@@ -247,7 +334,7 @@ export default function ProductsPage() {
             {filteredProducts.length} {filteredProducts.length === 1 ? "Product" : "Products"}
           </h2>
           <div style={{ color: colors.textSecondary }}>
-            Page {currentPage} of {Math.ceil(filteredProducts.length / itemsPerPage) || 1}
+            Page {currentPage} of {totalPages || 1}
           </div>
         </div>
 
@@ -260,8 +347,6 @@ export default function ProductsPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05, duration: 0.3 }}
               className="h-full"
-              onMouseEnter={() => setHoveredProduct(product.id)}
-              onMouseLeave={() => setHoveredProduct(null)}
             >
               <Link
                 href={`/products/${product.id}`}
@@ -279,19 +364,6 @@ export default function ProductsPage() {
                       backgroundImage: `url(${product.image || "/placeholder-product.jpg"})`,
                     }}
                   ></div>
-
-                  {/* Wishlist button */}
-                  <button
-                    className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center transition-colors"
-                    style={{ backgroundColor: colors.white }}
-                    onClick={(e) => {
-                      e.preventDefault()
-                      e.stopPropagation()
-                      // Add wishlist functionality here
-                    }}
-                  >
-                    <Heart size={16} style={{ color: colors.textSecondary }} />
-                  </button>
                 </div>
 
                 <div className="p-5 flex flex-col flex-grow">
@@ -309,7 +381,7 @@ export default function ProductsPage() {
                     </p>
 
                     <button
-                      onClick={(e) => handleAddToCart(product.id, e)}
+                      onClick={(e) => handleAddToCart(product.id, product.name, e)}
                       className="flex items-center justify-center px-3 py-2 rounded-md text-sm transition-colors"
                       style={{
                         backgroundColor: colors.pastelPink,
@@ -340,6 +412,7 @@ export default function ProductsPage() {
                 onClick={() => {
                   setSelectedCategory("")
                   setSearchQuery("")
+                  setCurrentPage(1)
                 }}
                 className="px-4 py-2 rounded-md text-sm font-medium"
                 style={{ backgroundColor: colors.pastelPink, color: colors.textPrimary }}
@@ -367,26 +440,14 @@ export default function ProductsPage() {
             </button>
 
             <div className="flex space-x-2">
-              {Array.from({ length: Math.min(5, Math.ceil(filteredProducts.length / itemsPerPage)) }, (_, i) => {
-                // Logic to show current page and surrounding pages
-                let pageNumber
-                const totalPages = Math.ceil(filteredProducts.length / itemsPerPage)
-
-                if (totalPages <= 5) {
-                  pageNumber = i + 1
-                } else if (currentPage <= 3) {
-                  pageNumber = i + 1
-                } else if (currentPage >= totalPages - 2) {
-                  pageNumber = totalPages - 4 + i
-                } else {
-                  pageNumber = currentPage - 2 + i
-                }
-
-                if (pageNumber > totalPages) return null
-
-                return (
+              {getPageNumbers().map((pageNumber, index) =>
+                pageNumber === "..." ? (
+                  <span key={`ellipsis-${index}`} className="px-2 text-gray-600">
+                    ...
+                  </span>
+                ) : (
                   <button
-                    key={pageNumber}
+                    key={`page-${pageNumber}`}
                     onClick={() => setCurrentPage(pageNumber)}
                     className="w-8 h-8 flex items-center justify-center rounded-full text-sm transition-colors"
                     style={{
@@ -397,24 +458,18 @@ export default function ProductsPage() {
                   >
                     {pageNumber}
                   </button>
-                )
-              })}
+                ),
+              )}
             </div>
 
             <button
               onClick={() => paginate("next")}
-              disabled={currentPage === Math.ceil(filteredProducts.length / itemsPerPage)}
+              disabled={currentPage === totalPages}
               className="p-2 rounded-full transition-colors"
               style={{
-                backgroundColor:
-                  currentPage === Math.ceil(filteredProducts.length / itemsPerPage)
-                    ? colors.lightGray
-                    : colors.pastelPink,
-                color:
-                  currentPage === Math.ceil(filteredProducts.length / itemsPerPage)
-                    ? colors.textLight
-                    : colors.textPrimary,
-                cursor: currentPage === Math.ceil(filteredProducts.length / itemsPerPage) ? "not-allowed" : "pointer",
+                backgroundColor: currentPage === totalPages ? colors.lightGray : colors.pastelPink,
+                color: currentPage === totalPages ? colors.textLight : colors.textPrimary,
+                cursor: currentPage === totalPages ? "not-allowed" : "pointer",
               }}
             >
               <ChevronRight size={20} />
