@@ -74,7 +74,6 @@ export default function ProductDetailsPage() {
               {product.name}
             </h1>
             <div className="mt-3">
-              <h2 className="sr-only">Product information</h2>
               <p className="text-3xl text-gray-900">${Number(product.price).toFixed(2)}</p>
             </div>
 
@@ -94,28 +93,12 @@ export default function ProductDetailsPage() {
                   Add to cart
                 </button>
               </div>
-              {isAuthenticated && (
-                <div className="mt-4 flex space-x-4">
-                  <button
-                    type="button"
-                    className="w-full bg-white border border-gray-300 rounded-md py-3 px-8 flex items-center justify-center text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                  >
-                    Edit Product
-                  </button>
-                  <button
-                    type="button"
-                    className="w-full bg-red-600 border border-transparent rounded-md py-3 px-8 flex items-center justify-center text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                  >
-                    Delete Product
-                  </button>
-                </div>
-              )}
             </div>
 
             <div className="mt-8 border-t border-gray-200 pt-8">
               <h2 className="text-sm font-medium text-gray-900">Category</h2>
               <div className="mt-4 prose prose-sm text-gray-500">
-                <p>{product.category?.name || 'Uncategorized'}</p>
+                <p>{product.SubCategory?.Category?.name  || 'Uncategorized'}</p>
               </div>
             </div>
           </div>
@@ -123,4 +106,4 @@ export default function ProductDetailsPage() {
       </div>
     </div>
   );
-} 
+}
