@@ -33,3 +33,4 @@ module.exports = async (req, res, next) => {
     res.status(401).json({ error: 'Authentication failed' });
   }
 }; 
+
