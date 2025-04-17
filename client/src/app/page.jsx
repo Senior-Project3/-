@@ -1,108 +1,218 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from './Contexts/AuthContext';
+import { ShoppingBag, Search, User, Menu, X, ChevronDown } from 'lucide-react';
+
+// Sample categories data - in a real app, this would come from your API
+const categories = [
+  {
+    id: 1,
+    name: "Men's Collection",
+    image: "/images/SoonNoon.jpg ",
+    link: "/products?category=men"
+  },
+  {
+    id: 2,
+    name: "Women's Collection",
+    image: "/images/download.jpg",
+    link: "/products?category=women"
+  },
+  {
+    id: 3,
+    name: "Kids' Collection",
+    image: "/images/kids-category.jpg",
+    link: "/products?category=kids"
+  }
+];
 
 export default function HomePage() {
   const { user, isAuthenticated } = useAuth();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [shuffledCategories, setShuffledCategories] = useState([]);
+
+  // Shuffle categories on component mount and when currentSlide changes
+  useEffect(() => {
+    const shuffled = [...categories].sort(() => Math.random() - 0.5);
+    setShuffledCategories(shuffled);
+  }, [currentSlide]);
+
+  // Auto-rotate slides
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % 3);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const heroSlides = [
+    {
+      image: "/images/hero-1.jpg",
+      title: "Redefine Your Style",
+      subtitle: "Discover the latest trends in fashion",
+      cta: "Shop Now"
+    },
+    {
+      image: "/images/hero-2.jpg",
+      title: "New Arrivals: Spring '25 Collection",
+      subtitle: "Fresh styles for the new season",
+      cta: "View Collection"
+    },
+    {
+      image: "/images/hero-3.jpg",
+      title: "Limited Time Offers",
+      subtitle: "Up to 50% off on selected items",
+      cta: "Explore Deals"
+    }
+  ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white pt-16">
+    <div className="min-h-screen">
+      {/* Navigation Bar */}
+      <nav className="bg-white/90 backdrop-blur-md fixed w-full z-50 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between h-16">
+            {/* Logo and Brand */}
+            <div className="flex items-center">
+              <Link href="/" className="flex items-center">
+                <ShoppingBag className="h-8 w-8 text-rose-500" />
+                <span className="ml-2 text-xl font-bold bg-gradient-to-r from-rose-500 to-pink-600 bg-clip-text text-transparent">
+                  StyleHub
+                </span>
+              </Link>
+            </div>
+
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center space-x-8">
+              <Link href="/products" className="text-gray-700 hover:text-rose-500 transition-colors">
+                Products
+              </Link>
+              <Link href="/features" className="text-gray-700 hover:text-rose-500 transition-colors">
+                Features
+              </Link>
+              <Link href="/about" className="text-gray-700 hover:text-rose-500 transition-colors">
+                About Us
+              </Link>
+            </div>
+
+            {/* Search and User Actions */}
+            <div className="flex items-center space-x-4">
+              <div className="relative hidden md:block">
+                <input
+                  type="text"
+                  placeholder="Search products..."
+                  className="w-64 px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent"
+                />
+                <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              </div>
+
+              <Link href="/cart" className="text-gray-700 hover:text-rose-500 transition-colors">
+                <ShoppingBag className="h-6 w-6" />
+              </Link>
+
+              {isAuthenticated ? (
+                <Link href="/profile" className="text-gray-700 hover:text-rose-500 transition-colors">
+                  <User className="h-6 w-6" />
+                </Link>
+              ) : (
+                <Link href="/login" className="text-gray-700 hover:text-rose-500 transition-colors">
+                  <User className="h-6 w-6" />
+                </Link>
+              )}
+
+              {/* Mobile menu button */}
+              <button
+                className="md:hidden text-gray-700 hover:text-rose-500 transition-colors"
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+              >
+                {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Navigation */}
+        {isMenuOpen && (
+          <div className="md:hidden bg-white border-t border-gray-200">
+            <div className="px-4 py-2 space-y-2">
+              <Link href="/products" className="block text-gray-700 hover:text-rose-500 transition-colors">
+                Products
+              </Link>
+              <Link href="/features" className="block text-gray-700 hover:text-rose-500 transition-colors">
+                Features
+              </Link>
+              <Link href="/about" className="block text-gray-700 hover:text-rose-500 transition-colors">
+                About Us
+              </Link>
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search products..."
+                  className="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent"
+                />
+                <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              </div>
+            </div>
+          </div>
+        )}
+      </nav>
+
       {/* Hero Section */}
-      <div className="relative">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl md:text-6xl">
-              <span className="block">Welcome to</span>
-              <span className="block text-indigo-600">Labbasni</span>
-            </h1>
-            <p className="mt-3 max-w-md mx-auto text-base text-gray-500 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
-              A modern web application with powerful features and secure authentication.
-            </p>
-            <div className="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start space-y-3 sm:space-y-0 sm:space-x-4">
-              <div className="rounded-md shadow">
+      <div className="relative h-screen">
+        {heroSlides.map((slide, index) => (
+          <div
+            key={index}
+            className={`absolute inset-0 transition-opacity duration-1000 ${
+              index === currentSlide ? 'opacity-100' : 'opacity-0'
+            }`}
+          >
+            <div
+              className="absolute inset-0 bg-cover bg-center"
+              style={{ backgroundImage: `url(${slide.image})` }}
+            >
+              <div className="absolute inset-0 bg-black/30" />
+            </div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="text-center text-white max-w-3xl px-4">
+                <h1 className="text-4xl md:text-6xl font-bold mb-4">{slide.title}</h1>
+                <p className="text-xl md:text-2xl mb-8">{slide.subtitle}</p>
                 <Link
-                  href="/features"
-                  className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 md:py-4 md:text-lg md:px-10 transition-all duration-200 transform hover:scale-105"
+                  href="/products"
+                  className="inline-block px-8 py-3 bg-rose-500 text-white rounded-full hover:bg-rose-600 transition-colors"
                 >
-                  Explore Features
-                </Link>
-              </div>
-              <div className="rounded-md shadow">
-                <Link
-                  href="/about"
-                  className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 md:py-4 md:text-lg md:px-10 transition-all duration-200"
-                >
-                  Learn More
+                  {slide.cta}
                 </Link>
               </div>
             </div>
           </div>
-        </div>
+        ))}
       </div>
 
-      {/* Features Section */}
-      <div className="py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
-              Features
-            </h2>
-            <p className="mt-3 max-w-2xl mx-auto text-xl text-gray-500 sm:mt-4">
-              Discover the powerful features that make our platform stand out.
-            </p>
-          </div>
-
-          <div className="mt-10">
-            <div className="space-y-10 md:space-y-0 md:grid md:grid-cols-2 md:gap-x-8 md:gap-y-10">
-              {/* Feature 1 */}
-              <div className="relative group">
-                <div className="absolute -inset-1 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-lg blur opacity-25 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
-                <div className="relative p-6 bg-white rounded-lg">
-                  <div className="flex items-center justify-center h-12 w-12 rounded-md bg-indigo-500 text-white">
-                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
-                  </div>
-                  <div className="mt-4">
-                    <h3 className="text-lg leading-6 font-medium text-gray-900">Fast Performance</h3>
-                    <p className="mt-2 text-base text-gray-500">
-                      Experience lightning-fast performance with our optimized code and modern technologies.
-                    </p>
-                  </div>
-                </div>
+      {/* Featured Categories */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <h2 className="text-3xl font-bold text-center mb-12">Shop by Category</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {shuffledCategories.map((category) => (
+            <Link
+              key={category.id}
+              href={category.link}
+              className="group relative overflow-hidden rounded-xl aspect-[4/5]"
+            >
+              <div
+                className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
+                style={{ backgroundImage: `url(${category.image})` }}
+              >
+                <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-colors" />
               </div>
-
-              {/* Feature 2 */}
-              <div className="relative group">
-                <div className="absolute -inset-1 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-lg blur opacity-25 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
-                <div className="relative p-6 bg-white rounded-lg">
-                  <div className="flex items-center justify-center h-12 w-12 rounded-md bg-indigo-500 text-white">
-                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                    </svg>
-                  </div>
-                  <div className="mt-4">
-                    <h3 className="text-lg leading-6 font-medium text-gray-900">Secure Authentication</h3>
-                    <p className="mt-2 text-base text-gray-500">
-                      State-of-the-art security measures to protect your data and privacy.
-                    </p>
-                  </div>
-                </div>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <h3 className="text-2xl font-bold text-white">{category.name}</h3>
               </div>
-            </div>
-          </div>
+            </Link>
+          ))}
         </div>
       </div>
-
-      {/* Footer */}
-      <footer className="bg-white">
-        <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-          <p className="text-center text-base text-gray-400">
-            &copy; 2024 My Website. All rights reserved.
-          </p>
-        </div>
-      </footer>
     </div>
   );
 } 
