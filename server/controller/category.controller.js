@@ -1,15 +1,15 @@
-const Category = require('../models/Category');
-
+const { models } = require('../models');
+const { Category } = models;
 
 const getAllCategories = async (req, res) => {
   try {
     const categories = await Category.findAll();
     res.status(200).json(categories);
   } catch (error) {
-    res.status(500).json({ message: error.message })
+    console.error('Error fetching categories:', error);
+    res.status(500).json({ message: error.message });
   }
-}
-
+};
 
 const getCategoryById = async (req, res) => {
   try {
@@ -19,10 +19,10 @@ const getCategoryById = async (req, res) => {
     }
     res.status(200).json(category);
   } catch (error) {
+    console.error('Error fetching category:', error);
     res.status(500).json({ message: error.message });
   }
 };
-
 
 const createCategory = async (req, res) => {
   try {
@@ -30,8 +30,8 @@ const createCategory = async (req, res) => {
     if (!name || !gender) {
       return res.status(400).json({ message: 'Name and gender are required' });
     }
-    if (!['mens', 'womens'].includes(gender)) {
-      return res.status(400).json({ message: 'Gender must be either "mens" or "womens"' });
+    if (!['mens', 'womens', 'kids'].includes(gender)) {
+      return res.status(400).json({ message: 'Gender must be either "mens", "womens", or "kids"' });
     }
 
     const category = await Category.create({
@@ -42,6 +42,7 @@ const createCategory = async (req, res) => {
 
     res.status(201).json(category);
   } catch (error) {
+    console.error('Error creating category:', error);
     if (error.name === 'SequelizeUniqueConstraintError') {
       return res.status(400).json({ message: 'Category name already exists' });
     }
@@ -58,9 +59,8 @@ const updateCategory = async (req, res) => {
       return res.status(404).json({ message: 'Category not found' });
     }
 
-    
-    if (gender && !['mens', 'womens'].includes(gender)) {
-      return res.status(400).json({ message: 'Gender must be either "mens" or "womens"' });
+    if (gender && !['mens', 'womens', 'kids'].includes(gender)) {
+      return res.status(400).json({ message: 'Gender must be either "mens", "womens", or "kids"' });
     }
 
     await category.update({
@@ -71,6 +71,7 @@ const updateCategory = async (req, res) => {
 
     res.status(200).json(category);
   } catch (error) {
+    console.error('Error updating category:', error);
     if (error.name === 'SequelizeUniqueConstraintError') {
       return res.status(400).json({ message: 'Category name already exists' });
     }
@@ -88,6 +89,7 @@ const deleteCategory = async (req, res) => {
     await category.destroy();
     res.status(200).json({ message: 'Category deleted successfully' });
   } catch (error) {
+    console.error('Error deleting category:', error);
     res.status(500).json({ message: error.message });
   }
 };

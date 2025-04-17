@@ -1,5 +1,5 @@
 'use client';
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import { useRouter } from 'next/navigation';
@@ -16,15 +16,54 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   const api = axios.create({
     baseURL: 'http://localhost:4000/api',
   });
 
+  // Add request interceptor to include token in all requests
+  api.interceptors.request.use((config) => {
+    const token = Cookies.get('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  });
+
+  // Add response interceptor to handle 401 errors
+  api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+      if (error.response?.status === 401) {
+        logout();
+      }
+      return Promise.reject(error);
+    }
+  );
+
+  // Fetch user data on mount and when token changes
+  useEffect(() => {
+    const fetchUser = async () => {
+      const token = Cookies.get('token');
+      if (token) {
+        try {
+          const response = await api.get('/users/profile');
+          setUser(response.data);
+        } catch (error) {
+          console.error('Error fetching user:', error);
+          Cookies.remove('token');
+        }
+      }
+      setLoading(false);
+    };
+
+    fetchUser();
+  }, []);
+
   const login = async (email, password) => {
     try {
-      // Make sure email and password are strings
       const emailStr = typeof email === 'string' ? email : email?.email;
       const passwordStr = typeof password === 'string' ? password : password?.password;
 
@@ -48,7 +87,7 @@ export const AuthProvider = ({ children }) => {
         const { token, user } = response.data;
         Cookies.set('token', token);
         setUser(user);
-        router.push('/');
+        router.push('/home');
         return { success: true };
       } else {
         return { 
@@ -58,9 +97,10 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       console.error('Login error:', error.response?.data || error);
+      // Return a more descriptive error message
       return { 
         success: false, 
-        error: error.response?.data?.error || 'Login failed' 
+        error: error.response?.data?.error || error.response?.data?.message || 'Login failed. Please check your credentials and try again.' 
       };
     }
   };
@@ -88,7 +128,7 @@ export const AuthProvider = ({ children }) => {
         const { token, user } = response.data;
         Cookies.set('token', token);
         setUser(user);
-        router.push('/');
+        router.push('/home');
         return { success: true };
       } else {
         return { 
@@ -98,9 +138,10 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       console.error('Registration error:', error.response?.data || error);
+      // Return a more descriptive error message
       return { 
         success: false, 
-        error: error.response?.data?.error || 'Registration failed' 
+        error: error.response?.data?.error || error.response?.data?.message || 'Registration failed. Please try again.' 
       };
     }
   };
@@ -108,7 +149,7 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     Cookies.remove('token');
     setUser(null);
-    router.push('/login');
+    router.push('/');
   };
 
   const value = {
@@ -116,7 +157,8 @@ export const AuthProvider = ({ children }) => {
     login,
     register,
     logout,
-    isAuthenticated: !!user
+    isAuthenticated: !!user,
+    loading
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
