@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ShoppingBag, User, Menu, X } from 'lucide-react';
-import Footer from './components/Footer';
 import { useAuth } from './Contexts/AuthContext';
 
 // Sample categories data - in a real app, this would come from your API
@@ -191,9 +190,6 @@ export default function LandingPage() {
           ))}
         </div>
       </div>
-
-      {/* Footer */}
-      <Footer />
     </div>
   );
 }

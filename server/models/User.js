@@ -26,12 +26,21 @@ const User = (sequelize) => {
     },
     password: {
       type: DataTypes.STRING,
-      allowNull: false,
+      // allowNull: false,
     },
     role: {
       type: DataTypes.ENUM('user', 'admin'),
       defaultValue: 'user',
     },
+    isBanned: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    banReason: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+  
   }, {
     timestamps: true,
   });
@@ -39,4 +48,4 @@ const User = (sequelize) => {
   return UserModel;
 };
 
-module.exports = User; 
+module.exports = User;

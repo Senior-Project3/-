@@ -11,7 +11,7 @@ export function middleware(request) {
   if (publicPaths.includes(pathname)) {
     // If user is already authenticated and tries to access login/register, redirect to dashboard
     if (token && (pathname === '/login' || pathname === '/register')) {
-      return NextResponse.redirect(new URL('/dashboard', request.url));
+      return NextResponse.redirect(new URL('/', request.url));
     }
     return NextResponse.next();
   }

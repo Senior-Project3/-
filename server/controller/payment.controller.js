@@ -1,84 +1,91 @@
-const axios = require('axios');
+const axios = require("axios");
+
+const x = process.env.FLOUCI_SECRET
+console.log(x , "x");
 
 module.exports = {
-  createPayment: async (req, res) => {
+  Add: async (req, res) => {
+    const url =  "https://developers.flouci.com/api/generate_payment"
+    const payload = {
+      app_token: "894a54f7-3f74-42ac-a4a1-91930ac0cd54", 
+      app_secret: "c9196db2-c1a1-41a7-ba17-c711f5c9c97e",
+      amount: req.body.amount,
+      accept_card: true,
+      session_timeout_secs: 1200,
+      success_link: "http://localhost:3000/payment", 
+      fail_link: "http://localhost:3001/Failed",    
+      developer_tracking_id: "b6e1e180-32d9-47ca-97e0-b591631c008f", 
+    };
+
     try {
-      const { amount, successUrl, failUrl } = req.body;
-      
-      if (!amount) {
-        return res.status(400).json({ error: 'Amount is required' });
-      }
+      const result = await axios.post(url, payload);
+console.log(result , "result");
 
-      if (typeof amount !== 'number') {
-        return res.status(400).json({ error: 'Amount must be a number' });
-      }
-
-      if (!process.env.FLOUCI_APP_TOKEN || !process.env.FLOUCI_APP_SECRET) {
-        return res.status(500).json({ error: 'Payment configuration is incomplete' });
-      }
-
-      const flouciResponse = await axios.post('https://developers.flouci.com/api/generate_payment', {
-        app_token: process.env.FLOUCI_APP_TOKEN,
-        app_secret: process.env.FLOUCI_APP_SECRET,
-        amount: amount,
-        accept_card: "true",
-        session_timeout_secs: 1200,
-        success_link: successUrl || "http://localhost:3000/payment/success",
-        fail_link: failUrl || "http://localhost:3000/payment/fail",
-        developer_tracking_id: process.env.FLOUCI_DEVELOPER_ID
-      });
-
-      res.json(flouciResponse.data);
-    } catch (error) {
-      console.error('Payment generation error details:', {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status,
-        config: {
-          url: error.config?.url,
-          method: error.config?.method,
-          data: error.config?.data
-        }
-      });
-
-      if (error.response) {
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
-        res.status(error.response.status).json({
-          error: 'Payment generation failed',
-          details: error.response.data
-        });
-      } else if (error.request) {
-        // The request was made but no response was received
-        res.status(500).json({
-          error: 'No response received from payment service',
-          details: error.message
-        });
+      if (result.status === 200) {
+        res.status(200).json(result.data); 
       } else {
-        // Something happened in setting up the request that triggered an Error
-        res.status(500).json({
-          error: 'Error setting up payment request',
-          details: error.message
-        });
+        console.error("Unexpected status code:", result.status);
+        res.status(500).send("Unexpected error with Flouci response");
+      }
+    } catch (error) {
+      if (error.response) {
+        console.error("Flouci Error:", error.response.status);
+        console.error("Details:", error.response.data);
+        res.status(error.response.status).json(error.response.data);
+      } else if (error.request) {
+        console.error("No response from Flouci");
+        res.status(500).send("No response from Flouci server");
+      } else {
+        console.error("Request setup error:", error.message);
+        res.status(500).send("Internal server error");
       }
     }
   },
-
-  verifyPayment: async (req, res) => {
-    try {
-      const { paymentId } = req.params;
-      
-      // Note: In test environment, payment information is only stored for 20 minutes
-      const flouciResponse = await axios.get(`https://developers.flouci.com/api/verify_payment/${paymentId}`, {
-        headers: {
-          'app_token': process.env.FLOUCI_APP_TOKEN,
-          'app_secret': process.env.FLOUCI_APP_SECRET
-        }
-      });
-
-      res.json(flouciResponse.data);
-    } catch (error) {
-      res.status(500).json({ error: error.message });
+   verify : async (req, res) => {
+    const paymentId = req.params.paymentId 
+    console.log(paymentId , "s");
+  
+    if (!paymentId) {
+      return res.status(400).json({ status: 'error', message: 'Missing payment ID' });
     }
-  }
-}; 
+  
+      const url = `https://developers.flouci.com/api/verify_payment/${paymentId}`;
+  
+      const headers = {
+        'Content-Type': 'application/json',
+        'apppublic': '894a54f7-3f74-42ac-a4a1-91930ac0cd54',  
+        'appsecret': "c9196db2-c1a1-41a7-ba17-c711f5c9c97e"
+      };
+    
+      try {
+        const response = await axios.get(url, { headers });
+  
+        console.log('Flouci Verification Response:', response.data);  
+  
+        if (response.data.result.status === 'SUCCESS') {
+          // Return payment details for order creation
+          return res.json({ 
+            status: 'success',
+            paymentId: paymentId,
+            transactionDetails: {
+              date: new Date().toISOString(),
+              provider: 'flouci',
+              amount: response.data.result.amount / 1000, // Convert back from millimes
+              paymentReference: response.data.result.payment_id
+            }
+          });
+        } else {
+          return res.status(400).json({ 
+            status: 'failed', 
+            message: 'Payment was not successful', 
+            paymentStatus: response.data.result.status 
+          });
+        }
+      } catch (error) {
+        console.error("Error verifying payment:", error.response ? error.response.data : error.message);
+        return res.status(500).json({ status: 'error', message: 'Server error' });
+      }
+    }
+    
+  
+};

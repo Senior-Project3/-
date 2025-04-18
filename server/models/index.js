@@ -19,6 +19,7 @@ const Category = require('./Category');
 const SubCategory = require('./SubCategory');
 const Cart = require('./Cart');
 const CartItem = require('./CartItem');
+const Order = require('./order');
 
 const models = {
   User: User(sequelize),
@@ -26,7 +27,8 @@ const models = {
   Category: Category(sequelize),
   SubCategory: SubCategory(sequelize),
   Cart: Cart(sequelize),
-  CartItem: CartItem(sequelize)
+  CartItem: CartItem(sequelize),
+  Order: Order(sequelize)
 };
 
 const defineAssociations = () => {

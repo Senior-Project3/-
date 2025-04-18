@@ -24,6 +24,25 @@ export default function Navbar() {
           {/* Logo and Brand */}
           <div className="flex items-center">
             <Link href="/" className="flex items-center">
+            <span 
+            // className="ml-2 text-xl font-bold bg-gradient-to-r from-emerald-500 to-green-600 bg-clip-text text-transparent"
+            // style={{fontFamily: 'bein', fontSize: '1.5rem', fontWeight: 'bold', color: "green", marginRight: '0.5rem'}}
+            style={{
+              marginRight: '0.5rem',
+              marginLeft: '0.5rem',
+              fontSize: '1.5rem',
+              fontWeight: 'bold',
+              backgroundImage: 'linear-gradient(to right, #10B981, #16A34A)',
+              WebkitBackgroundClip: 'text',
+              color: 'transparent',
+              WebkitTextFillColor: 'transparent',
+              fontFamily: 'bein'
+            }}
+            >
+            لبِّسني
+              </span>
+              <ShoppingBag className="h-8 w-8 text-emerald-500" />
+              {/* <span className="ml-2 text-xl font-bold bg-gradient-to-r from-emerald-500 to-green-600 bg-clip-text text-transparent"> */}
               <ShoppingBag className="h-8 w-8 text-teal-500" />
               <span className="ml-2 text-xl font-bold bg-gradient-to-r from-teal-600 to-emerald-600 bg-clip-text text-transparent">
                 Labbasni
@@ -71,7 +90,7 @@ export default function Navbar() {
                     >
                       Profile
                     </Link>
-                    <Link
+                    {/* <Link
                       href="/wishlist"
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                       onClick={() => setIsProfileOpen(false)}
@@ -83,7 +102,7 @@ export default function Navbar() {
                       className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                     >
                       Logout
-                    </button>
+                    </button> */}
                   </motion.div>
                 )}
               </div>
