@@ -118,7 +118,7 @@ const Sidebar = ({ collapsed }) => {
           </Link>
         </div>
 
-        <div className="mt-8 space-y-1">
+        {/* <div className="mt-8 space-y-1">
           {!collapsed && (
             <p className="px-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
               Orders
@@ -135,7 +135,7 @@ const Sidebar = ({ collapsed }) => {
             <Package className="h-5 w-5 mr-3" />
             {!collapsed && 'Orders'}
           </Link>
-        </div>
+        </div> */}
 
       </nav>
     </div>

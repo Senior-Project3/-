@@ -10,19 +10,13 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
-  PieChart as RechartsPieChart,
-  Pie,
-  Cell,
-  Legend,
   BarChart,
   Bar,
 } from "recharts"
 import {
-  CreditCard,
-  DollarSign,
   Package,
   Users,
-  TrendingUp,
+  DollarSign,
   ShoppingBag,
   Calendar,
   RefreshCw,
@@ -33,9 +27,8 @@ const DashboardPage = () => {
   const [theme, setTheme] = useState("light")
   const [products, setProducts] = useState([])
   const [users, setUsers] = useState([])
-  const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
-  const [errors, setErrors] = useState({ products: null, users: null, orders: null }) // Track errors per endpoint
+  const [errors, setErrors] = useState({ products: null, users: null }) // Track errors per endpoint
   const [activeTab, setActiveTab] = useState("overview")
 
   // Check system preference for dark mode
@@ -63,10 +56,10 @@ const DashboardPage = () => {
     }
   }
 
-  // Fetch users from API (real endpoint)
+  // Fetch users from API
   const fetchUsers = async () => {
     try {
-      const res = await axios.get("http://localhost:4000/api/users/getall") // Replace with your actual users endpoint
+      const res = await axios.get("http://localhost:4000/api/users/getall")
       setUsers(Array.isArray(res.data) ? res.data : [])
       setErrors((prev) => ({ ...prev, users: null }))
     } catch (error) {
@@ -76,25 +69,12 @@ const DashboardPage = () => {
     }
   }
 
-  // Fetch orders from API
-  const fetchOrders = async () => {
-    try {
-      const res = await axios.get("http://localhost:4000/api/orders/")
-      setOrders(Array.isArray(res.data) ? res.data : [])
-      setErrors((prev) => ({ ...prev, orders: null }))
-    } catch (error) {
-      console.error("Failed to fetch orders:", error)
-      setErrors((prev) => ({ ...prev, orders: "Failed to fetch orders" }))
-      setOrders([])
-    }
-  }
-
   // Fetch all data on mount
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true)
       try {
-        await Promise.all([fetchProducts(), fetchUsers(), fetchOrders()])
+        await Promise.all([fetchProducts(), fetchUsers()])
       } catch (error) {
         console.error("Error fetching data:", error)
       } finally {
@@ -116,24 +96,17 @@ const DashboardPage = () => {
       const sales = Number.parseInt(p.sales) || 0
       return sum + (isNaN(price) || isNaN(sales) ? 0 : price * sales)
     }, 0)
-    const totalOrders = orders.length
     const totalUsers = users.length
-    const avgOrderValue = totalOrders > 0 ? totalSales / totalOrders : 0
-
-    // Calculate revenue growth (requires historical data from API)
-    // For simplicity, assume API returns a growth percentage or calculate it if historical data is available
     const revenueGrowth = 0 // Replace with real calculation if API provides historical data
 
     return {
       totalProducts,
       totalSoldProducts,
       totalSales,
-      totalOrders,
       totalUsers,
-      avgOrderValue,
       revenueGrowth,
     }
-  }, [products, orders, users])
+  }, [products, users])
 
   // Top 7 products by sales
   const overviewData = useMemo(() => {
@@ -146,31 +119,6 @@ const DashboardPage = () => {
         sales: Number.parseInt(p.sales) || 0,
       }))
   }, [products])
-
-  // Order status distribution
-  const orderStatusData = useMemo(() => {
-    const statusCounts = orders.reduce((acc, order) => {
-      const status = order.status?.toLowerCase() || "unknown"
-      acc[status] = (acc[status] || 0) + 1
-      return acc
-    }, {})
-
-    const colors = [
-      "#3b82f6",
-      "#10b981",
-      "#f59e0b",
-      "#ef4444",
-      "#8b5cf6",
-      "#ec4899",
-      "#06b6d4",
-    ]
-
-    return Object.entries(statusCounts).map(([status, value], index) => ({
-      name: status.charAt(0).toUpperCase() + status.slice(1),
-      value,
-      color: colors[index % colors.length],
-    }))
-  }, [orders])
 
   // New users per day (last 7 days) and per month
   const newUsersData = useMemo(() => {
@@ -238,13 +186,11 @@ const DashboardPage = () => {
     setLoading(true)
     try {
       if (type === "all") {
-        await Promise.all([fetchProducts(), fetchUsers(), fetchOrders()])
+        await Promise.all([fetchProducts(), fetchUsers()])
       } else if (type === "products") {
         await fetchProducts()
       } else if (type === "users") {
         await fetchUsers()
-      } else if (type === "orders") {
-        await fetchOrders()
       }
     } catch (error) {
       console.error(`Error refreshing ${type} data:`, error)
@@ -266,7 +212,7 @@ const DashboardPage = () => {
   }
 
   // Error state with option to retry specific endpoints
-  if (errors.products || errors.users || errors.orders) {
+  if (errors.products || errors.users) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800 p-4">
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 max-w-md text-center">
@@ -276,10 +222,7 @@ const DashboardPage = () => {
             <p className="text-gray-600 dark:text-gray-300 mb-2">{errors.products}</p>
           )}
           {errors.users && (
-            <p className="text-gray-600 dark:text-gray-300 mb-2">{errors.users}</p>
-          )}
-          {errors.orders && (
-            <p className="text-gray-600 dark:text-gray-300 mb-6">{errors.orders}</p>
+            <p className="text-gray-600 dark:text-gray-300 mb-6">{errors.users}</p>
           )}
           <div className="flex flex-col gap-2">
             {errors.products && (
@@ -298,15 +241,6 @@ const DashboardPage = () => {
               >
                 <RefreshCw className="h-4 w-4" />
                 <span>Retry Users</span>
-              </button>
-            )}
-            {errors.orders && (
-              <button
-                onClick={() => refreshData("orders")}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 mx-auto"
-              >
-                <RefreshCw className="h-4 w-4" />
-                <span>Retry Orders</span>
               </button>
             )}
             <button
@@ -347,7 +281,7 @@ const DashboardPage = () => {
           </div>
         </div>
 
-      {/* Stats Cards */}
+        {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <StatsCard
             icon={<Package size={24} />}
@@ -396,9 +330,9 @@ const DashboardPage = () => {
         </div>
 
         {/* Charts */}
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-7 mb-8">
+        <div className="grid grid-cols-1 gap-6 mb-8">
           {/* Overview Chart */}
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 col-span-1 lg:col-span-4 transition-all duration-300 hover:shadow-lg">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 transition-all duration-300 hover:shadow-lg">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
               <div>
                 <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-1">
@@ -477,73 +411,6 @@ const DashboardPage = () => {
               )}
             </div>
           </div>
-
-          {/* Order Status PieChart */}
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 col-span-1 lg:col-span-3 transition-all duration-300 hover:shadow-lg">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
-              <div>
-                <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-1">Order Status</h2>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Distribution of orders by status</p>
-              </div>
-              <div className="mt-2 sm:mt-0 text-sm font-medium text-blue-600 dark:text-blue-400">
-                {dashboardData.totalOrders} total orders
-              </div>
-            </div>
-            <div className="h-64 flex items-center justify-center">
-              {dashboardData.totalOrders > 0 ? (
-                <ResponsiveContainer width="100%" height="100%">
-                  <RechartsPieChart>
-                    <Pie
-                      data={orderStatusData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius= {80}
-                      paddingAngle={2}
-                      dataKey="value"
-                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(1)}%`}
-                      labelLine={false}
-                    >
-                      {orderStatusData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Legend
-                      layout="horizontal"
-                      verticalAlign="bottom"
-                      align="center"
-                      formatter={(value, entry, index) => (
-                        <span
-                          className="text-xs font-medium"
-                          style={{ color: theme === "dark" ? "#e5e7eb" : "#4b5563" }}
-                        >
-                          {value}
-                        </span>
-                      )}
-                    />
-                    <Tooltip
-                      formatter={(value, name, props) => [
-                        `${value} orders (${((value / dashboardData.totalOrders) * 100).toFixed(1)}%)`,
-                        props.payload.name,
-                      ]}
-                      contentStyle={{
-                        backgroundColor: theme === "dark" ? "#1f2937" : "#ffffff",
-                        borderRadius: "0.5rem",
-                        border: "none",
-                        boxShadow:
-                          "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
-                      }}
-                    />
-                  </RechartsPieChart>
-                </ResponsiveContainer>
-              ) : (
-                <div className="text-center text-gray-500 dark:text-gray-400">
-                  <ShoppingBag className="h-12 w-12 mx-auto mb-3 opacity-30" />
-                  <p>No orders available</p>
-                </div>
-              )}
-            </div>
-          </div>
         </div>
 
         {/* New Users Charts */}
@@ -561,7 +428,7 @@ const DashboardPage = () => {
                 Last 7 months
               </span>
             </div>
-      </div>
+          </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Daily Chart */}
@@ -576,12 +443,12 @@ const DashboardPage = () => {
                       data={newUsersData.daily}
                       margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
                     >
-              <defs>
+                      <defs>
                         <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8} />
                           <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
-                </linearGradient>
-              </defs>
+                        </linearGradient>
+                      </defs>
                       <CartesianGrid
                         strokeDasharray="3 3"
                         vertical={false}
@@ -614,8 +481,8 @@ const DashboardPage = () => {
                         fillOpacity={1}
                         fill="url(#colorUsers)"
                       />
-            </AreaChart>
-          </ResponsiveContainer>
+                    </AreaChart>
+                  </ResponsiveContainer>
                 ) : (
                   <div className="text-center text-gray-500 dark:text-gray-400 h-full flex items-center justify-center">
                     <Users className="h-12 w-12 mx-auto mb-3 opacity-30" />
@@ -679,36 +546,6 @@ const DashboardPage = () => {
               </div>
             </div>
           </div>
-        </div>
-
-        {/* Additional Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Average Order Value */}
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 transition-all duration-300 hover:shadow-lg">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
-                Average Order Value
-              </h3>
-              <div className="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 p-2 rounded-lg">
-                <CreditCard className="h-5 w-5" />
-              </div>
-            </div>
-            <div className="flex items-end gap-2 mb-2">
-              <p className="text-3xl font-bold text-gray-900 dark:text-white">
-                {formatCurrency(dashboardData.avgOrderValue)}
-              </p>
-              <p className="text-sm text-green-600 dark:text-green-400 font-medium flex items-center">
-                <TrendingUp className="h-3.5 w-3.5 mr-1" />
-                +5.2% from last month
-              </p>
-            </div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Based on {dashboardData.totalOrders} orders in the current period
-            </p>
-          </div>
-
-          {/* Revenue Growth */}
-          
         </div>
       </div>
     </div>
