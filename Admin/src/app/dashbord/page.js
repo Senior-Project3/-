@@ -708,23 +708,7 @@ const DashboardPage = () => {
           </div>
 
           {/* Revenue Growth */}
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 transition-all duration-300 hover:shadow-lg">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-800 dark:text-white">Revenue Growth</h3>
-              <div className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 p-2 rounded-lg">
-                <TrendingUp className="h-5 w-5" />
-              </div>
-            </div>
-            <div className="flex items-end gap-2 mb-2">
-              <p className="text-3xl font-bold text-gray-900 dark:text-white">
-                {dashboardData.revenueGrowth}%
-              </p>
-              <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">vs previous period</p>
-            </div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Total revenue: {formatCurrency(dashboardData.totalSales)}
-            </p>
-          </div>
+          
         </div>
       </div>
     </div>

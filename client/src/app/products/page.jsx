@@ -385,7 +385,7 @@ export default function ProductsPage() {
 
                   <div className="mt-auto pt-4 flex justify-between items-center">
                     <p className="text-lg font-semibold" style={{ color: colors.darkPink }}>
-                      {Number(product.price).toFixed(2)}TD
+                      {Number(product.price).toFixed(2)}TND
                     </p>
 
                     <button

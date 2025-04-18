@@ -330,7 +330,7 @@ export default function ProductDetailsPage() {
             {/* Price */}
             <div className="mt-4 mb-6">
               <p className="text-3xl" style={{ color: colors.textPrimary }}>
-                {Number(product.price).toFixed(2)}TD
+                {Number(product.price).toFixed(2)}TND
               </p>
               <p className="text-sm mt-1" style={{ color: colors.textSecondary }}>
                 Including all taxes
@@ -483,7 +483,7 @@ export default function ProductDetailsPage() {
                       {relatedProduct.name}
                     </h3>
                     <p className="mt-1 font-medium" style={{ color: colors.darkPink }}>
-                      {Number(relatedProduct.price).toFixed(2)}TD
+                      {Number(relatedProduct.price).toFixed(2)}TND
                     </p>
                   </Link>
                 ))

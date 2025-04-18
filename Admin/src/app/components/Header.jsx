@@ -8,7 +8,6 @@ import { useTheme } from '@/hooks/use-theme';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import PropTypes from 'prop-types';
-import Cookies from 'js-cookie';
 
 export const Header = ({ collapsed, setCollapsed }) => {
   const { theme, setTheme } = useTheme();
@@ -16,29 +15,33 @@ export const Header = ({ collapsed, setCollapsed }) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [readOrderIds, setReadOrderIds] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('readOrderIds');
+      return saved ? JSON.parse(saved) : [];
+    }
+    return [];
+  });
 
   const fetchNotifications = async (retryCount = 3, delay = 1000) => {
     try {
       setLoading(true);
       setError(null);
-      const token = Cookies.get('token'); // Get token for authentication
+      const token = localStorage.getItem('token');
       const response = await axios.get('http://localhost:4000/api/orders/', {
         headers: {
           Authorization: token ? `Bearer ${token}` : undefined,
           'Content-Type': 'application/json',
         },
-        timeout: 5000, // Set a 5-second timeout
+        timeout: 5000,
       });
 
       const orders = Array.isArray(response.data) ? response.data : [];
-      // Filter for pending orders or orders within the last 24 hours
-      const newOrders = orders.filter((order) => {
-        const isPending = order.status?.toLowerCase() === 'pending';
-        const createdAt = new Date(order.orderDate);
-        const now = new Date();
-        const isRecent = (now - createdAt) / (1000 * 60 * 60) <= 24;
-        return isPending || isRecent;
-      });
+      const newOrders = orders.filter(
+        (order) =>
+          order.status?.toLowerCase() === 'pending' &&
+          !readOrderIds.includes(order.id)
+      );
       setNotifications(newOrders);
     } catch (err) {
       console.error('Error fetching orders:', {
@@ -51,7 +54,7 @@ export const Header = ({ collapsed, setCollapsed }) => {
       if (retryCount > 0 && err.code === 'ERR_NETWORK') {
         console.log(`Retrying... (${retryCount} attempts left)`);
         await new Promise((resolve) => setTimeout(resolve, delay));
-        return fetchNotifications(retryCount - 1, delay * 2); // Exponential backoff
+        return fetchNotifications(retryCount - 1, delay * 2);
       }
 
       let errorMessage = 'Failed to fetch order notifications';
@@ -59,6 +62,7 @@ export const Header = ({ collapsed, setCollapsed }) => {
         errorMessage = 'Unable to connect to the server. Please check if the server is running.';
       } else if (err.response?.status === 401) {
         errorMessage = 'Unauthorized. Please log in again.';
+        window.location.href = '/login';
       } else if (err.response?.status === 403) {
         errorMessage = 'Access denied. You do not have permission to view orders.';
       } else if (err.response?.data?.error) {
@@ -72,15 +76,45 @@ export const Header = ({ collapsed, setCollapsed }) => {
 
   useEffect(() => {
     fetchNotifications();
-    const interval = setInterval(() => fetchNotifications(), 30000); // Poll every 30 seconds
+    const interval = setInterval(() => fetchNotifications(), 30000);
     return () => clearInterval(interval);
-  }, []);
+  }, [readOrderIds]);
+
+  useEffect(() => {
+    localStorage.setItem('readOrderIds', JSON.stringify(readOrderIds));
+  }, [readOrderIds]);
+
+  useEffect(() => {
+    const handleOrderEvents = () => {
+      fetchNotifications();
+    };
+
+    const handleOrderDeleted = (event) => {
+      const { orderId } = event.detail;
+      setReadOrderIds((prev) => {
+        const updated = prev.filter((id) => id !== orderId);
+        localStorage.setItem('readOrderIds', JSON.stringify(updated));
+        return updated;
+      });
+      fetchNotifications();
+    };
+
+    window.addEventListener('orderCreated', handleOrderEvents);
+    window.addEventListener('orderUpdated', handleOrderEvents);
+    window.addEventListener('orderDeleted', handleOrderDeleted);
+
+    return () => {
+      window.removeEventListener('orderCreated', handleOrderEvents);
+      window.removeEventListener('orderUpdated', handleOrderEvents);
+      window.removeEventListener('orderDeleted', handleOrderDeleted);
+    };
+  }, [fetchNotifications]);
 
   const handleMarkAsRead = (orderId) => {
+    setReadOrderIds((prev) => [...prev, orderId]);
     setNotifications(notifications.filter((order) => order.id !== orderId));
   };
 
-  // Reuse status badge styling from OrdersPage.jsx
   const getStatusBadgeClass = (status) => {
     switch (status?.toLowerCase()) {
       case 'delivered':

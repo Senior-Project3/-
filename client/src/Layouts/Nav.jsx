@@ -100,7 +100,7 @@ const Nav = () => {
                     </li>
                     {user.role === 'admin' && (
                       <li>
-                        <Link to="http://localhost:3005" className="dropdown-item">
+                        <Link to="http://localhost:3001" className="dropdown-item">
                           <i className="bi bi-gear-fill me-2"></i>Admin Dashboard
                         </Link>
                       </li>

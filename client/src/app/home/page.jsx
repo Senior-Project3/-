@@ -54,7 +54,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       {/* Navigation Bar */}
-      <nav className="bg-white/90 backdrop-blur-md fixed w-full z-50 shadow-sm">
+      {/* <nav className="bg-white/90 backdrop-blur-md fixed w-full z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex">
@@ -91,7 +91,7 @@ export default function HomePage() {
             </div>
           </div>
         </div>
-      </nav>
+      </nav> */}
 
       {/* Hero Section */}
       <div className="relative pt-16">

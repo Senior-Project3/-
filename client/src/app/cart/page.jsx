@@ -213,7 +213,7 @@ export default function CartPage() {
         </div>
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-8 w-full sm:w-auto mt-4 sm:mt-0">
           <div className="text-base font-medium" style={{ color: colors.textPrimary }}>
-            {Number(item.Product?.price).toFixed(2)}TD
+            {Number(item.Product?.price).toFixed(2)}TND
           </div>
           <div className="flex items-center border rounded-md" style={{ borderColor: colors.softBeige }}>
             <button
@@ -240,7 +240,7 @@ export default function CartPage() {
             </button>
           </div>
           <div className="text-base font-medium" style={{ color: colors.textPrimary }}>
-            {(item.Product?.price * item.quantity).toFixed(2)}TD
+            {(item.Product?.price * item.quantity).toFixed(2)}TND
           </div>
           <button
             onClick={() => handleRemoveItem(item.ProductId)}
@@ -394,7 +394,7 @@ export default function CartPage() {
                   Total:
                 </span>
                 <span className="text-xl font-medium" style={{ color: colors.darkPink }}>
-                  {Number(cart.total).toFixed(2)}TD
+                  {Number(cart.total).toFixed(2)}TND
                 </span>
               </div>
               <div className="w-full sm:w-auto">
@@ -405,6 +405,31 @@ export default function CartPage() {
                     color: colors.textPrimary,
                   }}
                   disabled={isRemoving}
+                  onClick={async () => {
+                    const totalAmount = cart.total;
+                    const amountInMillimes = totalAmount * 1000;
+                
+                    try {
+                      // Step 1: Initiate payment
+                      const response = await axios.post(
+                        `http://localhost:4000/api/payment`,
+                        {
+                          amount: amountInMillimes,
+                        }
+                      );
+                
+                      const paymentUrl = response.data.result?.link;
+                      if (!paymentUrl) {
+                        throw new Error("Payment URL not returned from the API.");
+                      }
+                
+                      setTimeout(() => {
+                        window.location.href = paymentUrl;
+                      }, 500);
+                    } catch (error) {
+                      console.error("Checkout Error:", error);
+                    }
+                  }}
                 >
                   Proceed to Checkout
                 </button>
